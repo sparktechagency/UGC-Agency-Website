@@ -48,6 +48,22 @@ const getSingleSubscription = catchAsync(async (req, res) => {
   });
 });
 
+const getExistSubscription = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const result = await subscriptionService.getSubscrptionExistSubscriptionQuery(
+    userId
+  );
+
+  console.log('result controller' ,result);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Subscriptionq are requered successful!!',
+  });
+});
+
 const updateSingleSubscription = catchAsync(async (req, res) => {
   const { id } = req.params;
   const payload = req.body;
@@ -86,6 +102,7 @@ export const subscriptionController = {
   createSubscription,
   getAllMySubscription,
   getSingleSubscription,
+  getExistSubscription,
   updateSingleSubscription,
   deleteSingleSubscription,
 };

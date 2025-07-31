@@ -17,6 +17,7 @@ subcriptionRouter
     subscriptionController.createSubscription,
   )
   .get('/', auth(USER_ROLE.USER), subscriptionController.getAllMySubscription)
+  .get('/existe',auth(USER_ROLE.USER), subscriptionController.getExistSubscription)
   .get('/:id', subscriptionController.getSingleSubscription)
   .patch(
     '/:id',

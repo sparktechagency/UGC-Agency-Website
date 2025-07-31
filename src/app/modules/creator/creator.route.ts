@@ -14,7 +14,7 @@ const upload = fileUpload('./public/uploads/video');
 creatorRouter
   .post(
     '/create-creator',
-    //  auth(USER_ROLE.ADMIN),
+    // auth(USER_ROLE.ADMIN),
     upload.fields([
       { name: 'ugcExampleVideo', maxCount: 6 },
       { name: 'introductionvideo', maxCount: 1 },
@@ -31,15 +31,24 @@ creatorRouter
   .get('/me', auth(USER_ROLE.CREATOR), creatorController.getCreatorMe)
   .get('/:id', creatorController.getSingleCreator)
   .patch(
-    '/:id',
-    //  auth(USER_ROLE.ADMIN),
+    '/update-creator',
+    // ((req,res) =>{
+    //   console.log('route hit hise')
+    // }),
+    auth(USER_ROLE.CREATOR),
+    upload.fields([
+      { name: 'ugcExampleVideo', maxCount: 6 },
+      { name: 'introductionvideo', maxCount: 1 },
+      { name: 'profile', maxCount: 1 },
+    ]),
     creatorController.updateSingleCreator,
   )
   .patch(
     '/approved-cancel/:id',
-     auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN),
     creatorController.approvedCancelSingleCreator,
   )
+
   .delete(
     '/:id',
     // auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),

@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import paypalClient from '../utils/paypal';
 dotenv.config({ path: path.join((process.cwd(), '.env')) });
 
 const aws = {
@@ -40,5 +41,7 @@ export default {
   googleApiKey: process.env.GOOGLEAPI,
   shipment_key: process.env.SHIPMENT_KEY,
   PAYPAL_MODE: process.env.PAYPAL_MODE,
+  paypalClientId: process.env.PAYPAL_CLIENT_ID,
+  paypalSecretId: process.env.PAYPAL_SECRET_ID,
   // user_jwt_token: process.env.USER_JWT_TOKEN,
 };

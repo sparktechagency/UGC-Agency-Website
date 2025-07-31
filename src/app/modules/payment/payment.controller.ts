@@ -17,6 +17,7 @@ import mongoose from 'mongoose';
 import { cancelTemplete, successTemplete } from '../../../templete/templete';
 import { calculateEndDate } from '../subscription/subcription.utils';
 import { notificationService } from '../notification/notification.service';
+import Package from '../package/package.model';
 
 
 const addPayment = catchAsync(async (req, res, next) => {
@@ -343,7 +344,35 @@ const successPage = async (req: Request, res: Response) => {
       throw new Error('HireCreator update failed!');
     }
 
-  
+    const subscriptioinExist: any = await Subscription.findById(
+      updateHireCreator.subscriptionId,
+    );
+    if (!subscriptioinExist) {
+      throw new Error('Subscription not found!');
+    } 
+
+
+    if (
+      subscriptioinExist.type === 'yearly' ||
+      subscriptioinExist.type === 'monthly'
+    ) {
+      const updateTakeVideoCount =
+        Number(subscriptioinExist.takeVideoCount) +
+        Number(updateHireCreator.takeVideoCount);
+      await Subscription.findByIdAndUpdate(
+        updateHireCreator.subscriptionId,
+        { takeVideoCount: updateTakeVideoCount, status:"running" },
+        { new: true, session },
+      );
+    } else {
+      await Subscription.findByIdAndUpdate(
+        updateHireCreator.subscriptionId,
+        { takeVideoCount: subscriptioinExist.videoCount, status:"running" },
+        { new: true, session },
+      );
+    }
+
+
 
 
     const paymentData = {
@@ -464,6 +493,128 @@ const cancelPaymentPage = async (req: Request, res: Response) => {
   }
 };
 
+const successPageDirect = async (req: Request, res: Response) => {
+  const { token }: any = req.query;
+  const { subscriptionId }: any = req.query;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const request = new paypal.orders.OrdersGetRequest(token);
+    const orderResponse = await paypalClient.execute(request);
+
+    if (orderResponse.result.status !== 'APPROVED') {
+      throw new Error('Payment not completed');
+    }
+
+    const captureRequest = new paypal.orders.OrdersCaptureRequest(token);
+    const captureResponse = await paypalClient.execute(captureRequest);
+
+    console.log(
+      'transactionId',
+      captureResponse.result.purchase_units[0].payments.captures[0].id,
+    );
+
+    if (captureResponse.result.status !== 'COMPLETED') {
+      throw new Error('Payment capture failed');
+    }
+
+    const subcription: any = await Subscription.findOne({_id:subscriptionId, status: 'pending' }).session(session);
+    
+
+    if (!subcription) {
+      throw new Error('Subscription not found!');
+    }
+
+    const paymentData = {
+      userId: subcription.userId,
+      method: 'paypal',
+      amount: Number(
+        captureResponse.result.purchase_units[0].payments.captures[0].amount
+          .value,
+      ),
+      status: 'paid',
+      transactionId:
+        captureResponse.result.purchase_units[0].payments.captures[0].id,
+      transactionDate: new Date(),
+      subscriptionId: subcription._id,
+    };
+    console.log('payment data', paymentData);
+
+    const payment = await Payment.create([paymentData], { session });
+    console.log('payment', payment);
+    if (!payment) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Payment not created!');
+    }
+
+    const notificationData = {
+      role: 'admin',
+      message: `New Hire Creator created and payment is completed`,
+      type: 'success',
+    };
+
+    await notificationService.createNotification(notificationData, session);
+
+    await session.commitTransaction();
+    res.send(successTemplete);
+  } catch (error) {
+    await session.abortTransaction();
+    const subcription: any = await Subscription.findOne({
+      _id: subscriptionId,
+      status: 'running',
+    }).session(session);
+
+    if (subcription) {
+      await Subscription.findByIdAndDelete(subcription._id).session(session);
+
+    }
+
+    await Subscription.findByIdAndDelete(subcription._id).session(session);
+
+
+    res.status(500).send('An error occurred while processing the payment.');
+  } finally {
+    session.endSession();
+  }
+};
+
+const cancelPaymentPageDirect = async (req: Request, res: Response) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { subscriptionId }: any = req.query;
+    console.log('subscriptionId', subscriptionId);
+
+    if (!subscriptionId) {
+      throw new Error('subscriptionId ID is required.');
+    }
+
+    const subscriptioin: any =
+      await Subscription.findById(subscriptionId).session(session);
+
+    if (!subscriptioin) {
+      throw new Error('subscriptioin not found.');
+    }
+
+    if (subscriptioin) {
+      await Subscription.findByIdAndDelete(subscriptioin._id).session(session);
+    }
+
+    await Subscription.findByIdAndDelete(subscriptioin._id).session(session);
+    await session.commitTransaction();
+    res.send(cancelTemplete);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error during cancellation:', error);
+
+    res
+      .status(500)
+      .send('An error occurred while processing the cancellation.');
+  }
+};
+
 
 // reniew
 const reniewSuccessPage = async (req: Request, res: Response) => {
@@ -497,15 +648,37 @@ const reniewSuccessPage = async (req: Request, res: Response) => {
      const days = isExistSubscription.type === 'monthly' ? 30 : 365;
           const generateEndDate = calculateEndDate(new Date(), days);
 
-    const updateSubscription: any = await Subscription.findByIdAndUpdate(
-      subscriptionId,
-      { endDate: generateEndDate },
-      { new: true, session },
-    );
+          const subscriptionPackage: any = await Package.findById(
+            isExistSubscription.packageId,
+          );
+          if (!subscriptionPackage) {
+            throw new AppError(404, 'Package not found');
+          }
+          const videoCount = subscriptionPackage.videoCount;
 
-    if (!updateSubscription) {
-      throw new Error('Subscription update failed!');
-    }
+
+          console.log('videoCount', videoCount);
+          const remainingVideo = Number(isExistSubscription.videoCount) - Number(isExistSubscription.takeVideoCount);
+          console.log('remainingVideo', remainingVideo);
+          const updateVideoCount = remainingVideo + Number(videoCount);
+          console.log('updateVideoCount', updateVideoCount);
+
+          // Now update the subscription with the new values
+          const updateSubscription: any = await Subscription.findByIdAndUpdate(
+            subscriptionId,
+            {
+              endDate: generateEndDate,
+              status: 'running',
+              videoCount: updateVideoCount,
+              takeVideoCount: 0,
+            },
+            { new: true, session }, 
+          );
+
+          if (!updateSubscription) {
+            throw new Error('Subscription update failed!');
+          }
+
 
     const paymentData = {
       userId: isExistSubscription.userId,
@@ -519,21 +692,21 @@ const reniewSuccessPage = async (req: Request, res: Response) => {
         captureResponse.result.purchase_units[0].payments.captures[0].id,
       transactionDate: new Date(),
       subscriptionId: isExistSubscription._id,
-      type: 'reniew',
+      type: 'renewal',
     };
-    console.log('payment data', paymentData);
+    console.log('payment data==', paymentData);
     
 
     const payment = await Payment.create([paymentData], { session });
-    console.log('payment', payment);
     if (payment.length === 0) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Payment not created!');
+      throw new AppError(400, 'Payment not created!');
     }
     await session.commitTransaction();
     res.send(successTemplete);
-  } catch (error) {
+  } catch (error:any) {
+    console.log('error reniew', error);
     await session.abortTransaction();
-    res.status(500).send('Something is wrong!!');
+    res.status(500).send(error.message);
   } finally {
     session.endSession();
   }
@@ -748,6 +921,8 @@ export const paymentController = {
   conformWebhook,
   successPage,
   cancelPaymentPage,
+  successPageDirect,
+  cancelPaymentPageDirect,
   reniewSuccessPage,
   reniewCancelPaymentPage,
   getAllEarningRasio,

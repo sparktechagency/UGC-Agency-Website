@@ -16,6 +16,10 @@ const messageSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      default: true,
+    },
     sender: {
       type: Schema.Types.ObjectId,
       required: true,

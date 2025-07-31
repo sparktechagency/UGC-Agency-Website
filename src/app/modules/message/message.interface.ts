@@ -9,4 +9,5 @@ export interface IMessages {
   chatId: Types.ObjectId;
   sender: Types.ObjectId;
   receiver: Types.ObjectId;
+  role: string;
 }

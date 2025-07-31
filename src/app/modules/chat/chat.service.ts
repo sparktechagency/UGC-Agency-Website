@@ -247,7 +247,7 @@ const getMyChatList = async (
       ],
     }).populate({
       path: 'participants',
-      select: 'fullName email image role _id phone',
+      select: 'fullName email image role _id phone profile',
       match: { _id: { $ne: userId } },
     });
   } else {
@@ -255,7 +255,7 @@ const getMyChatList = async (
       participants: { $all: userId },
     }).populate({
       path: 'participants',
-      select: 'fullName email image role _id phone',
+      select: 'fullName email image role _id phone profile',
       match: { _id: { $ne: userId } },
     });
   }
@@ -297,6 +297,7 @@ const getMyChatList = async (
       createdAt: null,
       updatedAt: null,
       __v: '',
+      role: '',
     };
 
     data.push({

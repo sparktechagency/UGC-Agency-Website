@@ -19,13 +19,13 @@ const createCreator = catchAsync(async (req, res) => {
 });
 
 const getAllCreator = catchAsync(async (req, res) => {
-  const { meta, result } = await creatorService.getAllCreatorQuery(req.query);
+  const result = await creatorService.getAllCreatorQuery(req.query);
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    meta: meta,
-    data: result,
+    meta: result.meta,
+    data: result.result,
     message: ' All Creator are requered successful!!',
   });
 });
@@ -54,10 +54,14 @@ const getSingleCreator = catchAsync(async (req, res) => {
 });
 
 const updateSingleCreator = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  console.log('creator update contorller')
+  const { userId } = req.user;
+  const imageFiles = req.files as {
+    [fieldname: string]: Express.Multer.File[];
+  };
   const payload = req.body;
 
-  const result = await creatorService.updateSingleCreatorQuery(id, payload);
+  const result = await creatorService.updateSingleCreatorQuery(userId, imageFiles, payload);
 
   sendResponse(res, {
     success: true,

@@ -12,6 +12,8 @@ import { paymentService } from '../payment/payment.service';
 import mongoose from 'mongoose';
 import { Payment } from '../payment/payment.model';
 import { notificationService } from '../notification/notification.service';
+import { CLIENT_RENEG_LIMIT } from 'tls';
+import { configDotenv } from 'dotenv';
 
 const createHireCreator = async (files: any, payload: any) => {
 
@@ -53,6 +55,7 @@ const createHireCreator = async (files: any, payload: any) => {
     const packageExist = await Package.findById(payload.packageId).session(
       session,
     );
+    console.log('packageExist=', packageExist);
     if (!packageExist) {
       throw new AppError(httpStatus.NOT_FOUND, 'Package not found');
     }
@@ -91,6 +94,7 @@ const createHireCreator = async (files: any, payload: any) => {
           userId: payload.userId,
           isDeleted: false,
           endDate: { $gt: new Date() },
+          $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
         }).session(session);
 
         if (!runningubscription) {
@@ -189,6 +193,37 @@ const createHireCreator = async (files: any, payload: any) => {
             throw new AppError(403, 'HireCreator created faild!!');
           }
 
+         
+
+          const updateTakeVideoCount =
+            Number(runningubscription.takeVideoCount) +
+            Number(result[0].takeVideoCount);
+
+          const updateSubscription = await Subscription.findOneAndUpdate(
+            {
+              _id: runningubscription._id,
+            },
+            { status: 'running' , takeVideoCount: updateTakeVideoCount },
+            { new: true, session }, 
+          );
+
+          if (!updateSubscription) {
+            throw new AppError(403, 'Subscription update faild!!');
+          }
+
+          const updateHireCreator = await HireCreator.findOneAndUpdate(
+            {
+              _id: result[0]?._id,
+            },
+            { status: 'pending', paymentStatus:"paid" },
+            { new: true, session },
+          );  
+           
+          if(!updateHireCreator){
+            throw new AppError(403, 'HireCreator update faild!!');
+          }
+
+
           if (files?.ugcPhoto?.[0]?.path) {
             const fileDeletePath = `${files.ugcPhoto[0].path}`;
             await unlink(fileDeletePath);
@@ -210,6 +245,20 @@ const createHireCreator = async (files: any, payload: any) => {
         //   });
         //   payload.contentInfo.ugcPhoto = ugcPhoto;
         // }
+
+        const runningPackage = await Subscription.findOne({
+          userId: payload.userId,
+          isDeleted: false,
+          type:"one_time",
+          status: 'pending',
+        });
+
+        if (runningPackage) {
+          throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'You currently have an active package. Please use this package before purchasing a new subscription.',
+          );
+        }
 
         const subscriptionData = {
           packageId: packageExist._id,
@@ -328,26 +377,41 @@ const createHireCreator = async (files: any, payload: any) => {
         userId: payload.userId,
         isDeleted: false,
         endDate: { $gt: new Date() },
+        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
       }).session(session);
 
       if (runningubscription) {
         throw new AppError(400, 'Your Subscription is already running!');
       }
 
-      const subscriptionData = {
-        packageId: packageExist._id,
+
+      const runningPackage:any = await Subscription.findOne({
+        type: 'one_time',
         userId: payload.userId,
-      };
+        packageId: packageExist._id,
+        isDeleted: false,
+        status:"pending"
+      })
+      console.log('runningPackage==', runningPackage);
 
-      const subcriptionResult: any =
-        await subscriptionService.createSubscription(subscriptionData);
 
-        console.log('subcriptionResult==', subcriptionResult);
-      if (!subcriptionResult) {
-        throw new AppError(403, 'Subscription created faild!!');
-      }
+      
 
-      payload.subscriptionId = subcriptionResult._id;
+      if (runningPackage) {
+
+        const alreadyCreateHireCreatorBySubscriptionId =
+          await HireCreator.findOne({
+            subscriptionId: runningPackage._id,
+          });
+
+        if (alreadyCreateHireCreatorBySubscriptionId) {
+          throw new AppError(
+            400,
+            'You have already created a hire creator for this package.',
+          );
+        }
+     
+      payload.subscriptionId = runningPackage._id;
 
       const hireCreatorData = {
         userId: payload.userId,
@@ -408,6 +472,130 @@ const createHireCreator = async (files: any, payload: any) => {
       console.log('hireCreatorData package data', hireCreatorData);
 
       console.log('dsafafaafasfasfasfa')
+     
+      const result = await HireCreator.create([hireCreatorData], { session });
+      console.log('result', result);
+      if (!result) {
+        throw new AppError(403, 'HireCreator created faild!!');
+      }
+
+      const updateSubscription = await Subscription.findOneAndUpdate(
+        {
+          _id: runningPackage._id,
+        },
+        { status: 'running', takeVideoCount: runningPackage.videoCount },
+        { new: true, session },
+      );
+
+      if (!updateSubscription) {
+        throw new AppError(403, 'Subscription update faild!!');
+      }
+
+      const updateHireCreator = await HireCreator.findOneAndUpdate(
+        {
+          _id: result[0]?._id,
+        },
+        { status: 'pending', paymentStatus: 'paid' },
+        { new: true, session },
+      );
+
+      if (!updateHireCreator) {
+        throw new AppError(403, 'HireCreator update faild!!');
+      }
+
+      if (files?.ugcPhoto?.[0]?.path) {
+        const fileDeletePath = `${files.ugcPhoto[0].path}`;
+        await unlink(fileDeletePath);
+        console.log('File deleted successfully');
+      }
+
+
+        await session.commitTransaction();
+        session.endSession();
+       
+
+        return result[0];
+      }else{
+
+        console.log('not running package')
+
+
+
+        
+      const subscriptionData = {
+        packageId: packageExist?._id,
+        userId: payload.userId,
+      };
+
+      const subcriptionResult: any =
+        await subscriptionService.createSubscription(subscriptionData);
+
+      console.log('subcriptionResult==', subcriptionResult);
+      if (!subcriptionResult) {
+        throw new AppError(403, 'Subscription created faild!!');
+      }
+
+      payload.subscriptionId = subcriptionResult?._id;
+
+      const hireCreatorData = {
+        userId: payload.userId,
+        subscriptionId: payload.subscriptionId,
+        brandInfo: {
+          name: payload.brandInfo.name,
+          email: payload.brandInfo.email,
+          phone: payload.brandInfo.phone,
+          productName: payload.brandInfo.productName,
+          productLink: payload.brandInfo.productLink,
+          productType: payload.brandInfo.productType,
+        },
+        brandSocial: {
+          tiktokHandle: payload.brandSocial.tiktokHandle,
+          tiktokLink: payload.brandSocial.tiktokLink,
+          instragramHandle: payload.brandSocial.instragramHandle,
+          instragramLink: payload.brandSocial.instragramLink,
+          websiteLink: payload.brandSocial.websiteLink,
+        },
+        contentInfo: {
+          additionalFormate: payload.contentInfo.additionalFormate,
+          videoDuration: payload.contentInfo.videoDuration,
+          platForm: payload.contentInfo.platForm,
+          usageType: payload.contentInfo.usageType,
+          adHookOrCtaRequest: payload.contentInfo.adHookOrCtaRequest,
+          exampleVideoLink: payload.contentInfo.exampleVideoLink,
+          ugcPhoto: payload.contentInfo.ugcPhoto,
+        },
+        characteristicInfo: {
+          ageRange: payload.characteristicInfo.ageRange,
+          gender: payload.characteristicInfo.gender,
+          location: payload.characteristicInfo.location,
+          language: payload.characteristicInfo.language,
+          script: payload.characteristicInfo.script,
+        },
+        doAndDonts: {
+          anyWordsNotToUse: payload.doAndDonts.anyWordsNotToUse,
+          anySpecificWordsUse: payload.doAndDonts.anySpecificWordsUse,
+          howToPronouncebrandName: payload.doAndDonts.howToPronouncebrandName,
+          anySpecialRequest: payload.doAndDonts.anySpecialRequest,
+          expressDelivery: payload.doAndDonts.expressDelivery,
+        },
+        lastContentInfo: {
+          textOverlay: payload.lastContentInfo.textOverlay,
+          captions: payload.lastContentInfo.captions,
+          music: payload.lastContentInfo.music,
+          extraHook: payload.lastContentInfo.extraHook,
+          extraCta: payload.lastContentInfo.extraCta,
+          videoType: payload.lastContentInfo.videoType,
+          additionalPerson: payload.lastContentInfo.additionalPerson,
+          offSiteAttraction: payload.lastContentInfo.offSiteAttraction,
+          goalOfProject: payload.lastContentInfo.goalOfProject,
+          tergetAudience: payload.lastContentInfo.tergetAudience,
+        },
+        takeVideoCount: payload.takeVideoCount,
+      };
+
+      console.log('hireCreatorData package data', hireCreatorData);
+
+      console.log('dsafafaafasfasfasfa');
       console.log('dsafafaafasfasfasfa=====', hireCreatorData.subscriptionId);
       const subscriptionId = new mongoose.Types.ObjectId(
         hireCreatorData.subscriptionId,
@@ -422,7 +610,7 @@ const createHireCreator = async (files: any, payload: any) => {
       if (subscriptioinCompleted) {
         throw new AppError(403, 'Subscription already completed!!');
       }
-      console.log('ddssasfaf')
+      console.log('ddssasfaf');
 
       const result = await HireCreator.create([hireCreatorData], { session });
       console.log('result', result);
@@ -436,23 +624,24 @@ const createHireCreator = async (files: any, payload: any) => {
         console.log('File deleted successfully');
       }
 
-      
-        const paymentData = {
-          userId: payload.userId,
-          amount: subcriptionResult.price,
-          orderId: result[0]._id,
-        };
-        console.log('paymentData', paymentData);
+      const paymentData = {
+        userId: payload.userId,
+        amount: subcriptionResult.price,
+        orderId: result[0]._id,
+      };
+      console.log('paymentData', paymentData);
 
-        const paymentUrl = await 
-          paymentService.createPaypalPaymentService(paymentData);
-        console.log('paymentUrl', paymentUrl);
+      const paymentUrl = await paymentService.createPaypalPaymentService(paymentData);
+      console.log('paymentUrl', paymentUrl);
 
-        await session.commitTransaction();
-        session.endSession();
-       
+      await session.commitTransaction();
+      session.endSession();
 
-        return paymentUrl;
+      return paymentUrl;
+
+      }
+
+     
     }
   } catch (error: any) {
     await session.abortTransaction();
@@ -485,6 +674,163 @@ const createHireCreator = async (files: any, payload: any) => {
   // finally {
   //   session.endSession();
   // }
+};
+
+const createPackagePurchase = async ( payload: any) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    console.log(' payload=', payload);
+    
+    if (!payload.packageId) {
+      throw new AppError(403, 'Package Id is required');
+    }
+
+    const packageExist = await Package.findById(payload.packageId).session(
+      session,
+    );
+    if (!packageExist) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Package not found');
+    }
+    const user = await User.findById(payload.userId).session(session);
+    if (!user) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+    }
+
+    if (packageExist.type === 'yearly' || packageExist.type === 'monthly') {
+      console.log('=subscription');
+
+
+      const runningSubscription = await Subscription.findOne({
+        userId: payload.userId,
+        type: packageExist.type,
+        isDeleted: false,
+        endDate: { $gt: new Date() },
+        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+      }).session(session);
+
+      if (runningSubscription) {
+        throw new AppError(403, 'You already have a running subscription!');
+      }
+
+
+      const existingSubscription = await Subscription.findOne({
+        userId: payload.userId,
+        type: packageExist.type,
+        isDeleted: false,
+      }).session(session);
+
+      if (existingSubscription) {
+        throw new AppError(
+          403,
+          'Your subscription has expired. Please renew your subscription to continue.',
+        );
+      }
+
+      const runningPackage = await Subscription.findOne({
+        userId: payload.userId,
+        isDeleted: false,
+        type: 'one_time',
+        status: 'pending',
+      });
+
+      if (runningPackage) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'You currently have an active package. Please use this package before purchasing a new subscription.',
+        );
+      }
+
+
+
+      const subscriptionData = {
+        packageId: packageExist?._id,
+        userId: payload.userId,
+      };
+      console.log('subscriptionData', subscriptionData);
+
+      const subcriptionResult: any =
+        await subscriptionService.createSubscription(subscriptionData, session);
+
+      if (!subcriptionResult) {
+        throw new AppError(403, 'Subscription created faild!!');
+      }
+
+      console.log('subcriptionResult==', subcriptionResult);
+
+      const paymentData = {
+        userId: payload.userId,
+        amount: subcriptionResult.price,
+        subscriptionId: subcriptionResult._id,
+      };
+      console.log('paymentData', paymentData);
+
+      const paymentUrl =
+        paymentService.createPaypalPaymentServiceDirect(paymentData);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return paymentUrl;
+        
+       
+      } else {
+      console.log('package ');
+      const runningubscription = await Subscription.findOne({
+        userId: payload.userId,
+        isDeleted: false,
+        endDate: { $gt: new Date() },
+        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+      }).session(session);
+
+      if (runningubscription) {
+        throw new AppError(400, 'Your Subscription is already running!');
+      }
+
+      const subscriptionData = {
+        packageId: packageExist?._id,
+        userId: payload.userId,
+      };
+
+      const subcriptionResult: any =
+        await subscriptionService.createSubscription(subscriptionData);
+
+        console.log('subcriptionResult==', subcriptionResult);
+      if (!subcriptionResult) {
+        throw new AppError(403, 'Subscription created faild!!');
+      }
+
+      
+
+        const paymentData = {
+          userId: payload.userId,
+          amount: subcriptionResult.price,
+          subscriptionId: subcriptionResult?._id,
+        };
+        console.log('paymentData', paymentData);
+
+        const paymentUrl = await paymentService.createPaypalPaymentServiceDirect(paymentData);
+        console.log('paymentUrl', paymentUrl);
+
+        await session.commitTransaction();
+        session.endSession();
+       
+
+        return paymentUrl;
+    }
+  } catch (error: any) {
+    console.log('error purchest', error);
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    session.endSession();
+    throw new AppError(
+      error.statusCode || 500,
+      error.message || 'Something went wrong',
+    );
+    
+  } 
 };
 
 
@@ -781,7 +1127,30 @@ const getAllHireCreatorByUserQuery = async (
   userId: String,
 ) => {
   const HireCreatorQuery = new QueryBuilder(
-    HireCreator.find({ userId }).populate('userId').populate('subscriptionId'),
+    HireCreator.find({ userId })
+      .select('brandInfo.name brandInfo.email status paymentStatus createdAt'),
+    query,
+  )
+    .search([])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await HireCreatorQuery.modelQuery;
+
+  const meta = await HireCreatorQuery.countTotal();
+  return { meta, result };
+};
+
+const getCreatorAllOrdersQuery = async (
+  query: Record<string, unknown>,
+  userId: String,
+) => {
+  const HireCreatorQuery = new QueryBuilder(
+    HireCreator.find({ creatorUserId: userId }).select(
+      'brandInfo.name brandInfo.email status paymentStatus createdAt creatorId creatorUserId',
+    ),
     query,
   )
     .search([])
@@ -859,25 +1228,25 @@ const approvedSingleHireCreator = async (id: String) => {
       throw new AppError(404, 'Subscription not found!!');
     }
 
-    if (
-      subscriptioinExist.type === 'yearly' ||
-      subscriptioinExist.type === 'monthly'
-    ) {
-      const updateTakeVideoCount =
-        Number(subscriptioinExist.takeVideoCount) +
-        Number(hireCreator.takeVideoCount);
-      await Subscription.findByIdAndUpdate(
-        hireCreator.subscriptionId,
-        { takeVideoCount: updateTakeVideoCount },
-        { new: true, session },
-      );
-    } else {
-      await Subscription.findByIdAndUpdate(
-        hireCreator.subscriptionId,
-        { takeVideoCount: subscriptioinExist.videoCount },
-        { new: true, session },
-      );
-    }
+    // if (
+    //   subscriptioinExist.type === 'yearly' ||
+    //   subscriptioinExist.type === 'monthly'
+    // ) {
+    //   const updateTakeVideoCount =
+    //     Number(subscriptioinExist.takeVideoCount) +
+    //     Number(hireCreator.takeVideoCount);
+    //   await Subscription.findByIdAndUpdate(
+    //     hireCreator.subscriptionId,
+    //     { takeVideoCount: updateTakeVideoCount },
+    //     { new: true, session },
+    //   );
+    // } else {
+    //   await Subscription.findByIdAndUpdate(
+    //     hireCreator.subscriptionId,
+    //     { takeVideoCount: subscriptioinExist.videoCount },
+    //     { new: true, session },
+    //   );
+    // }
     // 684f974057f251d44a8bc8b4
     const result = await HireCreator.findByIdAndUpdate(
       id,
@@ -966,6 +1335,19 @@ const cancelSingleHireCreator = async (id: String) => {
         { status: 'cancel' },
         { new: true, session },
       );
+
+      const subscriptionDataUpdate = await Subscription.findOneAndUpdate(
+        {
+          _id: hireCreator.subscriptionId,
+        }
+        ,
+        { $inc: { takeVideoCount: -Number(hireCreator.takeVideoCount) } },
+        { new: true, session },
+      )
+      if (!subscriptionDataUpdate) {
+        throw new AppError(403, 'subscriptionData update failed!');
+      }
+
       const paymentDataUpdate = await Payment.findOneAndUpdate(
         {
           userId: hireCreator.userId,
@@ -1027,6 +1409,7 @@ const assignTaskCreatorUploadVideosByCreator = async (
   session.startTransaction();
 
   try {
+    console.log('console-1')
     if (!id || !userId) {
       throw new AppError(400, 'Invalid input parameters');
     }
@@ -1034,72 +1417,125 @@ const assignTaskCreatorUploadVideosByCreator = async (
     const hireCreator: any =
       await HireCreator.findById(id).session(session);
     if (!hireCreator) {
-      throw new AppError(404, 'Hire Creator is not found!!');
+      throw new AppError(404, 'Order is not found!!');
     }
-
+    // console.log('hireCreator', hireCreator);
+    console.log('console-2');
     const subscriptioin = await Subscription.findById(
       hireCreator.subscriptionId,
     ).session(session);
     if (!subscriptioin) {
       throw new AppError(404, 'Subscription not found!!');
     }
+    // console.log('hireCreator', hireCreator);
+    console.log('console-3');
+    // if (
+    //   (hireCreator.status !== 'ongoing' && hireCreator.status !== 'revision') ||
+    //   hireCreator.creatorUserId.toString() !== userId.toString()
+    // ) {
+    //   throw new AppError(
+    //     404,
+    //     'HireCreator is not ongoing or revision, you are not the creator!',
+    //   );
+    // }
 
-    if (
-      hireCreator.status !== 'ongoing'  ||
-        hireCreator.creatorUserId.toString() !== userId.toString()
-    ) {
-      throw new AppError(
-        404,
-        'HireCreator is not ongoing, you are not the creator!',
-      );
-    }
-
+ 
+    console.log('console-4');
     if (!files || files.uploadVideos.length === 0) {
       throw new AppError(400, 'No video files uploaded');
     }
+    console.log('console-5');
 
-
-
-    if (files.uploadVideos.length > subscriptioin.takeVideoCount) {
-      throw new AppError(
-        400,
-        `You can only upload ${subscriptioin.takeVideoCount} videos`,
-      );
-    }
-
-    if (files.uploadVideos && files.uploadVideos.length > 0) {
-      const videos: any = await uploadManyToS3(
-        files.uploadVideos,
-        'uploadVideos/',
-      );
-
-      if (!videos || videos.length === 0) {
-        throw new AppError(400, 'Video upload failed');
-      }
-
-      const updateHireCreator = await HireCreator.findByIdAndUpdate(
-        id,
-        { uploadedFiles: videos, status: 'completed' },
-        { new: true, session },
-      );
-
-      if ( !updateHireCreator) {
+    if (hireCreator.status === 'ongoing'){
+      console.log('console-ongoing');
+      if (files.uploadVideos.length > subscriptioin.takeVideoCount) {
         throw new AppError(
-          403,
-          'Failed to update HireCreator',
+          400,
+          `You can only upload ${subscriptioin.takeVideoCount} videos`,
         );
       }
 
-      const allVideoPaths = files.uploadVideos.map(
-        (video: any) => `${video.path}`,
-      );
-      await Promise.all(allVideoPaths.map((path: any) => unlink(path)));
+      if (files.uploadVideos && files.uploadVideos.length > 0) {
+        console.log('file -upload-1')
+        const videos: any = await uploadManyToS3(
+          files.uploadVideos,
+          'uploadVideos/',
+        );
+        console.log('file -upload-2');
 
-      await session.commitTransaction();
-      session.endSession();
+        if (!videos || videos.length === 0) {
+          throw new AppError(400, 'Video upload failed');
+        }
+        console.log('file -upload-3');
+        const updateHireCreator = await HireCreator.findByIdAndUpdate(
+          id,
+          { uploadedFiles: videos, status: 'completed' },
+          { new: true, session },
+        );
+        console.log('file -upload-4');
+        if (!updateHireCreator) {
+          throw new AppError(403, 'Failed to update HireCreator');
+        }
 
-      return updateHireCreator;
+        const allVideoPaths = files.uploadVideos.map(
+          (video: any) => `${video.path}`,
+        );
+        await Promise.all(allVideoPaths.map((path: any) => unlink(path)));
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return updateHireCreator;
+      }
+
+
+    
+    }else{
+      console.log('dsakalf revision hit hoise')
+
+      if (hireCreator.uploadedFiles.length > subscriptioin.takeVideoCount) {
+        throw new AppError(
+          400,
+          `You can only upload ${subscriptioin.takeVideoCount} videos`,
+        );
+      }
+
+      if (files.uploadVideos && files.uploadVideos.length > 0) {
+        const videos: any = await uploadManyToS3(
+          files.uploadVideos,
+          'uploadVideos/',
+        );
+
+        if (!videos || videos.length === 0) {
+          throw new AppError(400, 'Video upload failed');
+        }
+
+        const updateHireCreator = await HireCreator.findByIdAndUpdate(
+          id,
+          {
+            uploadedFiles: [...hireCreator.uploadedFiles, ...videos],
+            status: 'completed',
+          },
+          { new: true, session },
+        );
+
+        if (!updateHireCreator) {
+          throw new AppError(403, 'Failed to update HireCreator');
+        }
+
+        const allVideoPaths = files.uploadVideos.map(
+          (video: any) => `${video.path}`,
+        );
+        await Promise.all(allVideoPaths.map((path: any) => unlink(path)));
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return updateHireCreator;
+
+
     }
+  }
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
@@ -1128,9 +1564,13 @@ const assignTaskRevisionByUser = async (
   payload: any,
 ) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
+  
+
+  console.log('payload=====', payload);
 
   try {
+    session.startTransaction();
+
     if (!payload.revisionText && !payload.status) {
       throw new AppError(
         400,
@@ -1161,12 +1601,14 @@ const assignTaskRevisionByUser = async (
         );
       }
      
+      console.log('payload.revisionText', payload);
 
       const updateHireCreator = await HireCreator.findByIdAndUpdate(
         id,
         { status: 'revision', isScript: payload.revisionText },
         { new: true, session },
       );
+      console.log('updateHireCreator', updateHireCreator);
 
       if (!updateHireCreator) {
         throw new AppError(403, 'HireCreator update failed!!');
@@ -1217,6 +1659,8 @@ const assignTaskRevisionByUser = async (
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
+
+    // console.log('error', error);
 
     throw new AppError(
       error.statusCode || 500,
@@ -1327,6 +1771,51 @@ const assignTaskCreatorReSubmitUploadVideosByCreator = async (
 
 
 
+const deleteSingleHireCreatorVideoDeleteByCreator = async (id: string, userId:string, payload:any) => {
+  if (!id) {
+    throw new AppError(400, 'Invalid input parameters');
+  }
+  const hireCreator = await HireCreator.findById(id);
+  if (!hireCreator) {
+    throw new AppError(404, 'HireCreator Not Found!!');
+  }
+
+  if(hireCreator.creatorUserId?.toString() !== userId.toString()){
+    throw new AppError(404, 'You are a not valid creator!!');
+  }
+
+  const key = payload.videourl.split('amazonaws.com/')[1];
+
+  const videoDoc = await HireCreator.findOne({
+    'uploadedFiles.url': payload.videourl,
+  });
+
+  console.log('videoDoc', videoDoc);
+
+  if (!videoDoc) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Video not found in the database');
+  }
+
+  const deleteImage: any = await deleteFromS3(key);
+  console.log('deleteImage', deleteImage);
+
+  console.log('videoDoc', videoDoc);
+
+  if (deleteImage) {
+    const updatedDoc = await HireCreator.findOneAndUpdate(
+      { 'uploadedFiles.url': payload.videourl },
+      { $pull: { uploadedFiles: { url: payload.videourl } } },
+      { new: true },
+    );
+
+    return updatedDoc;
+  } else {
+    throw new AppError(httpStatus.NOT_FOUND, 'Video not found in the database');
+  }
+
+};
+
+
 const deletedHireCreatorQuery = async (id: string) => {
   if (!id) {
     throw new AppError(400, 'Invalid input parameters');
@@ -1348,6 +1837,7 @@ export const hireCreatorService = {
   createHireCreator,
   getAllHireCreatorQuery,
   getAllHireCreatorByUserQuery,
+  getCreatorAllOrdersQuery,
   getSingleHireCreatorQuery,
   updateSingleHireCreatorQuery,
   approvedSingleHireCreator,
@@ -1355,5 +1845,7 @@ export const hireCreatorService = {
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
   assignTaskCreatorReSubmitUploadVideosByCreator,
+  deleteSingleHireCreatorVideoDeleteByCreator,
   deletedHireCreatorQuery,
+  createPackagePurchase,
 };

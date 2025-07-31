@@ -14,11 +14,21 @@ hireCreatorRouter
     upload.fields([{ name: 'ugcPhoto', maxCount: 1 }]),
     hireCreatorController.createHireCreator,
   )
+  .post(
+    '/createPackagePurchase',
+    auth(USER_ROLE.USER),
+    hireCreatorController.createPackagePurchase,
+  )
   .get('/', hireCreatorController.getAllHireCreator)
   .get(
     '/user',
     auth(USER_ROLE.USER),
     hireCreatorController.getAllHireCreatorByUser,
+  )
+  .get(
+    '/creator-all-orders',
+    auth(USER_ROLE.CREATOR),
+    hireCreatorController.getCreatorAllOrders,
   )
   .get('/:id', hireCreatorController.getSingleHireCreator)
   .patch(
@@ -54,8 +64,13 @@ hireCreatorRouter
     hireCreatorController.assignTaskCreatorReSubmitUploadVideosByCreator,
   )
   .delete(
+    '/delete-video/:id',
+    auth(USER_ROLE.CREATOR),
+    hireCreatorController.deleteSingleHireCreatorVideoDelete,
+  )
+  .delete(
     '/:id',
-    // auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     hireCreatorController.deleteSingleHireCreator,
   );
 

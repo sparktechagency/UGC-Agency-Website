@@ -1,215 +1,216 @@
-import AppError from '../../error/AppError';
-import httpStatus from 'http-status';
-import QueryBuilder from '../../builder/QueryBuilder';
-import { TPurchestPackage } from './purchestPackage.interface';
-import PurchestPackage from './purchestPackage.model';
-import Package from '../package/package.model';
-import { calculateEndDate } from './purchestPackage.utils';
-import { BASE_URL, getPaypalAccessToken } from '../../utils/paypal';
-import axios from 'axios';
-import Subscription from '../subscription/subscription.model';
-import { Payment } from '../payment/payment.model';
+// import AppError from '../../error/AppError';
+// import httpStatus from 'http-status';
+// import QueryBuilder from '../../builder/QueryBuilder';
+// import { TPurchestPackage } from './purchestPackage.interface';
+// import PurchestPackage from './purchestPackage.model';
+// import Package from '../package/package.model';
+// import { calculateEndDate } from './purchestPackage.utils';
+// import { BASE_URL, getPaypalAccessToken } from '../../utils/paypal';
+// import axios from 'axios';
+// import Subscription from '../subscription/subscription.model';
+// import { Payment } from '../payment/payment.model';
 
-const createPurchestPackage = async (payload:any) => {
-  console.log('package payload=', payload);
+// const createPurchestPackage = async (payload:any) => {
+//   console.log('package payload=', payload);
 
-  // Check if subscriptionId or packageId are required based on type
-  if (payload.type === 'subscription' && !payload.subscriptionId) {
-    throw new AppError(403, 'Subscription id is required!!');
-  }
-  if (payload.type === 'package' && !payload.packageId) {
-    throw new AppError(403, 'Package id is required!!');
-  }
+//   // Check if subscriptionId or packageId are required based on type
+//   if (payload.type === 'subscription' && !payload.subscriptionId) {
+//     throw new AppError(403, 'Subscription id is required!!');
+//   }
+//   if (payload.type === 'package' && !payload.packageId) {
+//     throw new AppError(403, 'Package id is required!!');
+//   }
 
-  // Fetch package if exists
-  if (payload.packageId) {
-    const existingPackage = await Package.findById(payload.packageId);
-    if (!existingPackage) {
-      throw new AppError(404, 'Package not found!');
-    }
-    payload.price = existingPackage.price;
-  }
+//   // Fetch package if exists
+//   if (payload.packageId) {
+//     const existingPackage = await Package.findById(payload.packageId);
+//     if (!existingPackage) {
+//       throw new AppError(404, 'Package not found!');
+//     }
+//     payload.price = existingPackage.price;
+//   }
 
-  console.log('sdfafafaf')
-  console.log('payload.subscriptionId', payload.subscriptionId);
+//   console.log('sdfafafaf')
+//   console.log('payload.subscriptionId', payload.subscriptionId);
 
-  // Fetch subscription if exists
-  if (payload.subscriptionId) {
-    const existingSubscription = await Subscription.findOne({_id: payload.subscriptionId})
-    console.log('existingSubscription==', existingSubscription);
-    if (!existingSubscription) {
-      throw new AppError(404, 'Subscription not found!');
-    }
-    payload.price = existingSubscription.price;
-    const days = existingSubscription.type === 'monthly' ? 30 : 365;
-    const generateEndDate = calculateEndDate(new Date(), days);
-    payload.endDate = generateEndDate;
-  }
+//   // Fetch subscription if exists
+//   if (payload.subscriptionId) {
+//     const existingSubscription = await Subscription.findOne({_id: payload.subscriptionId})
+//     console.log('existingSubscription==', existingSubscription);
+//     if (!existingSubscription) {
+//       throw new AppError(404, 'Subscription not found!');
+//     }
+//     payload.price = existingSubscription.price;
+//     const days = existingSubscription.type === 'monthly' ? 30 : 365;
+//     const generateEndDate = calculateEndDate(new Date(), days);
+//     payload.endDate = generateEndDate;
+//   }
 
-  // Ensure there's no running subscription
-  const runningSubscription = await PurchestPackage.findOne({
-    userId: payload.userId,
-    status: 'running',
-    type: 'subscription',
-  });
-  if (runningSubscription) {
-    throw new AppError(403, 'You already have a running subscription!');
-  }
+//   // Ensure there's no running subscription
+//   const runningSubscription = await PurchestPackage.findOne({
+//     userId: payload.userId,
+//     status: 'running',
+//     type: 'subscription',
+//   });
+//   if (runningSubscription) {
+//     throw new AppError(403, 'You already have a running subscription!');
+//   }
 
-//   // Get PayPal access token
-//   const assecToken = await getPaypalAccessToken();
-//   console.log('assecToken==', assecToken);
+// //   // Get PayPal access token
+// //   const assecToken = await getPaypalAccessToken();
+// //   console.log('assecToken==', assecToken);
 
-  try {
-//     const order = await axios.post(
-//       `${BASE_URL}/v2/checkout/orders`,
-//       {
-//         intent: 'CAPTURE',
-//         purchase_units: [
-//           {
-//             amount: {
-//               currency_code: 'USD',
-//               value: '100',
-//             },
-//           },
-//         ],
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${assecToken}`,
-//           'Content-Type': 'application/json',
-//         },
-//       },
-//     );
+//   try {
+// //     const order = await axios.post(
+// //       `${BASE_URL}/v2/checkout/orders`,
+// //       {
+// //         intent: 'CAPTURE',
+// //         purchase_units: [
+// //           {
+// //             amount: {
+// //               currency_code: 'USD',
+// //               value: '100',
+// //             },
+// //           },
+// //         ],
+// //       },
+// //       {
+// //         headers: {
+// //           Authorization: `Bearer ${assecToken}`,
+// //           'Content-Type': 'application/json',
+// //         },
+// //       },
+// //     );
 
-//     console.log('order==', order);
-//     console.log('order data==', order.data);
-//     console.log('order data id==', order.data.id);
+// //     console.log('order==', order);
+// //     console.log('order data==', order.data);
+// //     console.log('order data id==', order.data.id);
 
-//     if (!order.data || !order.data.id) {
-//       throw new AppError(400, 'Order creation failed.');
+// //     if (!order.data || !order.data.id) {
+// //       throw new AppError(400, 'Order creation failed.');
+// //     }
+
+// //     const capture = await axios.post(
+// //       `${BASE_URL}/v2/checkout/orders/${order.data.id}/capture`,
+// //       {},
+// //       {
+// //         headers: {
+// //           Authorization: `Bearer ${assecToken}`,
+// //           'Content-Type': 'application/json',
+// //         },
+// //       },
+// //     );
+
+// //     console.log('capture==', capture);
+
+// //     if (!capture.data) {
+// //       throw new AppError(400, 'Capture failed.');
+// //     }
+
+//     // Create the purchase package record
+//     const result = await PurchestPackage.create(payload);
+
+//     if (!result) {
+//       throw new AppError(403, 'Subscription creation failed!');
 //     }
 
-//     const capture = await axios.post(
-//       `${BASE_URL}/v2/checkout/orders/${order.data.id}/capture`,
-//       {},
-//       {
-//         headers: {
-//           Authorization: `Bearer ${assecToken}`,
-//           'Content-Type': 'application/json',
-//         },
-//       },
-//     );
+//     const paymentData:any = {
+//       status: 'paid',
+//       amount: result.price,
+//       transactionId: 'dsdsdkklddd',
+//       userId: result.userId,
+//       transactionDate: new Date(),
+//     };
 
-//     console.log('capture==', capture);
-
-//     if (!capture.data) {
-//       throw new AppError(400, 'Capture failed.');
+//     if(result.type === 'subscription'){
+//       paymentData.subscriptionId = result._id;
+//     }else{
+//       paymentData.packageId = result._id;
 //     }
 
-    // Create the purchase package record
-    const result = await PurchestPackage.create(payload);
+//     const payment = await Payment.create(paymentData);
 
-    if (!result) {
-      throw new AppError(403, 'Subscription creation failed!');
-    }
+//     if (!payment) {
+//       throw new AppError(403, 'payment creation failed!');
+//     }   
 
-    const paymentData:any = {
-      status: 'paid',
-      amount: result.price,
-      transactionId: 'dsdsdkklddd',
-      userId: result.userId,
-      transactionDate: new Date(),
-    };
-
-    if(result.type === 'subscription'){
-      paymentData.subscriptionId = result._id;
-    }else{
-      paymentData.packageId = result._id;
-    }
-
-    const payment = await Payment.create(paymentData);
-
-    if (!payment) {
-      throw new AppError(403, 'payment creation failed!');
-    }   
-
-  const updateResult =  await PurchestPackage.findByIdAndUpdate(
-      result._id,
-      {status: 'running'},
-      { new: true },
-    );
+//   const updateResult =  await PurchestPackage.findByIdAndUpdate(
+//       result._id,
+//       {status: 'running'},
+//       { new: true },
+//     );
     
 
-    return updateResult;
-  } catch (error) {
-    console.error('Error during payment or package creation', error);
-    throw new AppError(500, 'Payment processing failed.');
-  }
-};
+//     return updateResult;
+//   } catch (error) {
+//     console.error('Error during payment or package creation', error);
+//     throw new AppError(500, 'Payment processing failed.');
+//   }
+// };
 
-const getAllPurchestPackageQuery = async (query: Record<string, unknown>) => {
-  const subscriptionQuery = new QueryBuilder(PurchestPackage.find(), query)
-    .search([])
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
 
-  const result = await subscriptionQuery.modelQuery;
+// const getAllPurchestPackageQuery = async (query: Record<string, unknown>) => {
+//   const subscriptionQuery = new QueryBuilder(PurchestPackage.find(), query)
+//     .search([])
+//     .filter()
+//     .sort()
+//     .paginate()
+//     .fields();
 
-  const meta = await subscriptionQuery.countTotal();
-  return { meta, result };
-};
+//   const result = await subscriptionQuery.modelQuery;
 
-const getSinglePurchestPackageQuery = async (id: string) => {
-  const ScreateSubscription: any = await PurchestPackage.findById(id);
-  if (!ScreateSubscription) {
-    throw new AppError(404, 'Subscription Not Found!!');
-  }
-  return ScreateSubscription;
-};
+//   const meta = await subscriptionQuery.countTotal();
+//   return { meta, result };
+// };
 
-const updateSinglePurchestPackageQuery = async (id: string, payload: any) => {
-  console.log('id', id);
-  console.log('updated payload', payload);
-  const ScreateSubscriptionProduct: any = await PurchestPackage.findById(id);
-  if (!ScreateSubscriptionProduct) {
-    throw new AppError(404, 'Subscription is not found!');
-  }
+// const getSinglePurchestPackageQuery = async (id: string) => {
+//   const ScreateSubscription: any = await PurchestPackage.findById(id);
+//   if (!ScreateSubscription) {
+//     throw new AppError(404, 'Subscription Not Found!!');
+//   }
+//   return ScreateSubscription;
+// };
 
-  const result = await PurchestPackage.findByIdAndUpdate(id, payload, {
-    new: true,
-  });
+// const updateSinglePurchestPackageQuery = async (id: string, payload: any) => {
+//   console.log('id', id);
+//   console.log('updated payload', payload);
+//   const ScreateSubscriptionProduct: any = await PurchestPackage.findById(id);
+//   if (!ScreateSubscriptionProduct) {
+//     throw new AppError(404, 'Subscription is not found!');
+//   }
 
-  if (!result) {
-    throw new AppError(403, 'Subscription updated faild!!');
-  }
+//   const result = await PurchestPackage.findByIdAndUpdate(id, payload, {
+//     new: true,
+//   });
 
-  return result;
-};
+//   if (!result) {
+//     throw new AppError(403, 'Subscription updated faild!!');
+//   }
 
-const deletedPurchestPackageQuery = async (id: string) => {
-  if (!id) {
-    throw new AppError(400, 'Invalid input parameters');
-  }
-  const subscription = await PurchestPackage.findById(id);
-  if (!subscription) {
-    throw new AppError(404, 'Subscription Not Found!!');
-  }
+//   return result;
+// };
 
-  const result = await PurchestPackage.findByIdAndDelete(id);
-  if (!result) {
-    throw new AppError(404, 'Subscription Result Not Found !');
-  }
+// const deletedPurchestPackageQuery = async (id: string) => {
+//   if (!id) {
+//     throw new AppError(400, 'Invalid input parameters');
+//   }
+//   const subscription = await PurchestPackage.findById(id);
+//   if (!subscription) {
+//     throw new AppError(404, 'Subscription Not Found!!');
+//   }
 
-  return result;
-};
+//   const result = await PurchestPackage.findByIdAndDelete(id);
+//   if (!result) {
+//     throw new AppError(404, 'Subscription Result Not Found !');
+//   }
 
-export const purchestPackageService = {
-  createPurchestPackage,
-  getAllPurchestPackageQuery,
-  getSinglePurchestPackageQuery,
-  updateSinglePurchestPackageQuery,
-  deletedPurchestPackageQuery,
-};
+//   return result;
+// };
+
+// export const purchestPackageService = {
+//   createPurchestPackage,
+//   getAllPurchestPackageQuery,
+//   getSinglePurchestPackageQuery,
+//   updateSinglePurchestPackageQuery,
+//   deletedPurchestPackageQuery,
+// };

@@ -10,6 +10,7 @@ import Package from '../package/package.model';
 import { calculateEndDate } from './subcription.utils';
 import mongoose from 'mongoose';
 import { Payment } from '../payment/payment.model';
+import e from 'express';
 
 
 const createSubscription = async (payload: any, session?: any) => {
@@ -44,7 +45,7 @@ const createSubscription = async (payload: any, session?: any) => {
       }).session(createdSession);
 
       if (existingSubscription) {
-        throw new AppError(400, 'You already have a Subscription!');
+        throw new AppError(400, 'You already have a Subscription! Please renew it.');
       }
 
       payload.price = existingPackage.price;
@@ -53,13 +54,14 @@ const createSubscription = async (payload: any, session?: any) => {
       payload.endDate = generateEndDate;
       payload.videoCount = existingPackage.videoCount;
       payload.type = existingPackage.type;
-      payload.status = 'running';
+      // payload.status = 'running';
     } else {
       console.log('subscription service package==');
       const runningubscription = await Subscription.findOne({
         userId: payload.userId,
         isDeleted: false,
         endDate: { $gt: new Date() },
+        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
       }).session(createdSession);
 
       if (runningubscription) {
@@ -68,7 +70,7 @@ const createSubscription = async (payload: any, session?: any) => {
       payload.price = existingPackage.price;
       payload.videoCount = existingPackage.videoCount;
       payload.type = existingPackage.type;
-      payload.status = 'running';
+      // payload.status = 'running';
     }
 
    
@@ -112,8 +114,17 @@ const createSubscription = async (payload: any, session?: any) => {
 const getAllMysubscriptionQuery = async (query: Record<string, unknown>, userId: string) => {
  
   if (query.running && query.running === 'subscription'){
+    console.log('subscription');
 
-    const result = await Subscription.findOne({ userId: userId, isDeleted: false,  endDate: { $gt: new Date() }, type: ['monthly', 'yearly'] }).populate('packageId').populate('userId');
+    const result = await Subscription.findOne({
+      userId: userId,
+      isDeleted: false,
+      endDate: { $gt: new Date() },
+      type: ['monthly', 'yearly'],
+      $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+    })
+      .populate('packageId')
+      .populate('userId');
 
     // console.log('result==', result);
 
@@ -121,6 +132,7 @@ const getAllMysubscriptionQuery = async (query: Record<string, unknown>, userId:
 
   }
   else if(query.all && query.all === 'subscription'){
+    console.log('all')
     delete query.all;
 
     const subscriptionQuery = new QueryBuilder(
@@ -144,6 +156,7 @@ const getAllMysubscriptionQuery = async (query: Record<string, unknown>, userId:
     return { meta, result };
 
   }else if (query.all && query.all === 'package') {
+    console.log('query.all==', 'package');
     delete query.all;
 
     const subscriptionQuery = new QueryBuilder(
@@ -151,6 +164,32 @@ const getAllMysubscriptionQuery = async (query: Record<string, unknown>, userId:
         userId: userId,
         isDeleted: false,
         type: 'one_time',
+      })
+        .populate('packageId')
+        .populate('userId'),
+      query,
+    )
+      .search([])
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+
+    const result = await subscriptionQuery.modelQuery;
+    console.log('result==', result);
+
+    const meta = await subscriptionQuery.countTotal();
+    return { meta, result };
+  } else if (query.running && query.running === 'package') {
+    console.log('query.running==', query.running);
+    delete query.running; 
+
+    const subscriptionQuery = new QueryBuilder(
+      Subscription.find({
+        userId: userId,
+        isDeleted: false,
+        type: 'one_time',
+        status: 'pending',
       })
         .populate('packageId')
         .populate('userId'),
@@ -202,6 +241,37 @@ const getSingleSubscriptionQuery = async (id: string) => {
   return existingSubscription;
 };
 
+
+const getSubscrptionExistSubscriptionQuery = async (userId: string) => {
+  
+  const existingPackage: any = await Subscription.findOne({
+    type: 'one_time',
+    userId: userId,
+    isDeleted: false,
+    status: 'pending',
+  });
+  const existingSubscription: any = await Subscription.findOne({
+    type: ['monthly', 'yearly'],
+    userId: userId,
+    isDeleted: false,
+    endDate: { $gt: new Date() },
+    $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+  });
+
+
+    if (existingPackage || existingSubscription) {
+      // console.log('existingSubscription==', existingSubscription);
+      // console.log('existingPackage==', existingPackage);
+
+      return 'true';
+    } else {
+      return 'false';
+    }
+
+
+
+};
+
 const updateSingleSubscriptionQuery = async (id: string, files: any, payload: any) => {
   
 };
@@ -235,6 +305,7 @@ export const subscriptionService = {
   createSubscription,
   getAllMysubscriptionQuery,
   getSingleSubscriptionQuery,
+  getSubscrptionExistSubscriptionQuery,
   updateSingleSubscriptionQuery,
   deletedsubscriptionQuery,
 };

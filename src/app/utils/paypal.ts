@@ -53,12 +53,12 @@ import config from '../config';
 const environment =
   config.PAYPAL_MODE === 'live'
     ? new core.LiveEnvironment(
-        'AZOmOqMn-cZwFN1VqfLd56SudIXu5rp22rvg6d3SyR3wB0Ud_jkDT8Y2XvLdzKeuhwLtxEkpCJxo7-zh',
-        'ENvP_VIvVDPDXnII_rZRDTHV5HtS6zWboKUCZiv_PrNF1rP2iuqS_rplComzimYabkOAT81B_g1XuFC7',
+        config.paypalClientId as string,
+        config.paypalSecretId as string,
       )
     : new core.SandboxEnvironment(
-        'AZOmOqMn-cZwFN1VqfLd56SudIXu5rp22rvg6d3SyR3wB0Ud_jkDT8Y2XvLdzKeuhwLtxEkpCJxo7-zh',
-        'ENvP_VIvVDPDXnII_rZRDTHV5HtS6zWboKUCZiv_PrNF1rP2iuqS_rplComzimYabkOAT81B_g1XuFC7',
+        config.paypalClientId as string,
+        config.paypalSecretId as string,
       );
 
 const paypalClient = new core.PayPalHttpClient(environment);

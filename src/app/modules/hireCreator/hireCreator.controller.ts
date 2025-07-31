@@ -20,6 +20,21 @@ const createHireCreator = catchAsync(async (req, res) => {
   });
 });
 
+
+const createPackagePurchase = catchAsync(async (req, res) => {
+  const payload = req.body;
+  const { userId } = req.user;
+  payload.userId = userId;
+  const result = await hireCreatorService.createPackagePurchase(payload);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Package Purchase successful!!',
+  });
+});
+
 const getAllHireCreator = catchAsync(async (req, res) => {
   const { meta, result } = await hireCreatorService.getAllHireCreatorQuery(req.query);
 
@@ -45,6 +60,21 @@ const getAllHireCreatorByUser = catchAsync(async (req, res) => {
     meta: meta,
     data: result,
     message: ' All HireCreator are requered successful!!',
+  });
+});
+const getCreatorAllOrders = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const { meta, result } = await hireCreatorService.getCreatorAllOrdersQuery(
+    req.query,
+    userId,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    meta: meta,
+    data: result,
+    message: ' All HireCreator orders are requered successful!!',
   });
 });
 
@@ -127,13 +157,17 @@ const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
 const assignTaskRevisionByUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
+  const bodyData = req.body.revisionText;
+  // console.log('bodyData', bodyData);
   const payload: any = {};
-  if (req.query?.revisionText) {
-    payload['revisionText'] = req.query.revisionText;
+  if (req.body?.revisionText) {
+    payload['revisionText'] = req.body.revisionText;
   }
   if (req.query?.status) {
     payload['status'] = req.query.status;
   }
+
+  // console.log('payload****', payload);
 
   const result = await hireCreatorService.assignTaskRevisionByUser(
     id,
@@ -145,7 +179,7 @@ const assignTaskRevisionByUser = catchAsync(async (req, res) => {
     success: true,
     statusCode: httpStatus.OK,
     data: result,
-    message: 'Single AssignTaskCreator is successful!!',
+    message: 'Single HireCreator Revision or deliver is successful!!',
   });
 });
 
@@ -172,6 +206,25 @@ const assignTaskCreatorReSubmitUploadVideosByCreator = catchAsync(
     });
   },
 );
+const deleteSingleHireCreatorVideoDelete = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const {userId} = req.user;
+  const videoUrl = req.body;
+ 
+  const result =
+    await hireCreatorService.deleteSingleHireCreatorVideoDeleteByCreator(
+      id,
+      userId,
+      videoUrl,
+    );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single delete  are upload Video successful!!',
+  });
+});
 
 const deleteSingleHireCreator = catchAsync(async (req, res) => {
   const result = await hireCreatorService.deletedHireCreatorQuery(req.params.id);
@@ -188,6 +241,7 @@ export const hireCreatorController = {
   createHireCreator,
   getAllHireCreator,
   getAllHireCreatorByUser,
+  getCreatorAllOrders,
   getSingleHireCreator,
   updateSingleHireCreator,
   approvedSingleHireCreator,
@@ -195,5 +249,7 @@ export const hireCreatorController = {
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
   assignTaskCreatorReSubmitUploadVideosByCreator,
+  deleteSingleHireCreatorVideoDelete,
   deleteSingleHireCreator,
+  createPackagePurchase,
 };

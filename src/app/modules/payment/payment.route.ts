@@ -30,6 +30,8 @@ paymentRouter
 
   .get('/success', paymentController.successPage)
   .get('/cancel', paymentController.cancelPaymentPage)
+  .get('/success-page', paymentController.successPageDirect)
+  .get('/cancel-page', paymentController.cancelPaymentPageDirect)
   .get('/reniew-success', paymentController.reniewSuccessPage)
   .get('/reniew-cancel', paymentController.reniewCancelPaymentPage)
 

@@ -11,6 +11,8 @@ import { deleteManyFromS3, uploadManyToS3 } from '../../utils/s3';
 import { unlink } from 'fs/promises';
 import mongoose from 'mongoose';
 import paypalClient from '../../utils/paypal';
+import Chat from '../chat/chat.model';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 
 const createAssignTaskCreator = async (payload: any) => {
   console.log('AssignTaskCreator payload=', payload);
@@ -99,8 +101,11 @@ const getAllAssignTaskCreatorQuery = async (query: Record<string, unknown>) => {
       // .populate('hireCreatorId')
       .populate({
         path: 'hireCreatorUserId',
-        select:
-          'fullName email address phone',
+        select: 'fullName email address phone',
+      })
+      .populate({
+        path: 'creatorUserId',
+        select: 'fullName email address phone',
       }),
     query,
   )
@@ -130,10 +135,14 @@ const getAllAssignTaskCreatorOfUserQuery = async (
 
   const assignTaskCreatorQuery = new QueryBuilder(
     AssignTaskCreator.find({ [updateUserId]: userId })
-      .populate('creatorId')
-      .populate('creatorUserId')
-      .populate('hireCreatorId')
-      .populate('hireCreatorUserId'),
+      // .populate('creatorId')
+      // .populate('creatorUserId')
+      .populate({
+        path: 'hireCreatorId',
+        select:
+          'brandInfo.name brandInfo.email brandInfo.phone brandInfo.productName status paymentStatus',
+      }),
+    // .populate('hireCreatorUserId'),
     query,
   )
     .search([])
@@ -282,6 +291,23 @@ const singleAssignTaskCreatorApprovedByAdmin = async (id: string) => {
       throw new AppError(403, 'HireCreator update failed!');
     }
 
+    const admin = await User.findOne({ role: 'admin' }).session(session);
+    if (!admin) {
+      throw new AppError(404, 'Admin not found!');
+    }
+    console.log('Admin', admin);
+   
+    const chatCreate = await Chat.create(
+      {
+        participants: [admin._id, assignTaskCreatorProduct.creatorUserId],
+      },
+      { session },
+    );
+
+   
+  if (!chatCreate || chatCreate.length === 0) {
+    throw new AppError(403, 'Chat creation failed!');
+  }   
    const allDeleteAssignTaskCreator = await AssignTaskCreator.deleteMany({
      hireCreatorId: assignTaskCreatorProduct.hireCreatorId
    })

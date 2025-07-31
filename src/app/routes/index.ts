@@ -18,9 +18,10 @@ import packageRouter from '../modules/package/package.route';
 import blogRouter from '../modules/blog/blog.route';
 import subcriptionRouter from '../modules/subscription/subscription.route';
 import hireCreatorRouter from '../modules/hireCreator/hireCreator.route';
-import purchestRouter from '../modules/purchestPackage/purchestPackage.route';
+// import purchestRouter from '../modules/purchestPackage/purchestPackage.route';
 import uploadVideoRouter from '../modules/uploadVideo/uploadVideo.route';
 import assignTaskCreatorRouter from '../modules/assignTaskCreator/assignTaskCreator.route';
+import contactUsRouter from '../modules/contactUs/contactUs.route';
 
 const router = Router();
 
@@ -105,10 +106,10 @@ const moduleRoutes = [
     path: '/blog',
     route: blogRouter,
   },
-  {
-    path: '/purchest',
-    route: purchestRouter,
-  },
+  // {
+  //   path: '/purchest',
+  //   route: purchestRouter,
+  // },
   {
     path: '/upload-video',
     route: uploadVideoRouter,
@@ -116,6 +117,10 @@ const moduleRoutes = [
   {
     path: '/assign-task-creator',
     route: assignTaskCreatorRouter,
+  },
+  {
+    path: '/contact-us',
+    route: contactUsRouter,
   },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

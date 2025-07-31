@@ -9,6 +9,8 @@ import { User } from '../user/user.models';
 import mongoose from 'mongoose';
 import { populate } from 'dotenv';
 import { imageUrlGenarate } from '../../utils/imageUrl';
+// import redisClient from '../../utils/redis';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 
 const createCreator = async (files: any, payload: TCreator) => {
   const session = await mongoose.startSession(); 
@@ -112,13 +114,17 @@ const createCreator = async (files: any, payload: TCreator) => {
 
 
 const getAllCreatorQuery = async (query: Record<string, unknown>) => {
+  // const cachedCreator = await redisClient.get('creators');
+  // if (cachedCreator) {
+  //   return JSON.parse(cachedCreator); // Return cached result
+  // }
   const CreatorQuery = new QueryBuilder(
     Creator.find().populate({path:'userId', select:"profile"}).select(
       'accountHolderName phone email country status',
     ),
     query,
   )
-    .search([])
+    .search(['phone', 'email', 'country'])
     .filter()
     .sort()
     .paginate()
@@ -127,14 +133,38 @@ const getAllCreatorQuery = async (query: Record<string, unknown>) => {
   const result = await CreatorQuery.modelQuery;
 
   const meta = await CreatorQuery.countTotal();
-  return { meta, result };
+
+  const responseData = { meta, result };
+
+//   await redisClient.set('creators', JSON.stringify(responseData),
+//   //  {
+//   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
+//   // }
+// );
+
+  return responseData;
 };
 const getCreatorMeQuery = async (userId: string) => {
-  const result = await Creator.find({ userId });
+  // const cachedCreator = await redisClient.get('creator');
+  // if (cachedCreator) {
+  //   return JSON.parse(cachedCreator); // Return cached result
+  // }
+  const result = await Creator.findOne({ userId }).populate({path:'userId', select:"fullName phone profile"});
+  // await redisClient.set(
+  //   'creator',
+  //   JSON.stringify(result),
+  //   //  {
+  //   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
+  //   // }
+  // );
   return result;
 };
 
 const getSingleCreatorQuery = async (id: string) => {
+  // const cachedCreatorme = await redisClient.get(`creatorMe${id}`);
+  // if (cachedCreatorme) {
+  //   return JSON.parse(cachedCreatorme); // Return cached result
+  // }
   const creator: any = await Creator.findById(id).populate({
     path: 'userId',
     select: 'profile',
@@ -142,25 +172,112 @@ const getSingleCreatorQuery = async (id: string) => {
   if (!creator) {
     throw new AppError(404, 'Creator Not Found!!');
   }
+  // await redisClient.set(
+  //   `creatorMe${id}`,
+  //   JSON.stringify(creator),
+  //   //  {
+  //   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
+  //   // }
+  // );
   return creator;
 };
 
 
-const updateSingleCreatorQuery = async (id: string, payload: any) => {
-  console.log('id', id);
+
+const updateSingleCreatorQuery = async (userId: string, files:any, payload: any) => {
+  console.log('userId', userId);
   console.log('updated payload', payload);
-  const creatorProduct: any = await Creator.findById(id);
-  if (!creatorProduct) {
-    throw new AppError(404, 'Creator is not found!');
+
+  console.log('file.length', files);
+
+
+  try {
+
+    const userExist = await User.findById(userId);
+
+    if(!userExist){
+      throw new AppError(404, 'User is not found!');
+    }
+
+    const creatorProduct: any = await Creator.findOne({userId});
+    if (!creatorProduct) {
+      throw new AppError(404, 'Creator is not found!');
+    }
+
+
+    if (files && files?.introductionvideo && files?.introductionvideo?.length > 0) {
+      const introductionVideo: any = await uploadToS3({
+        file: files.introductionvideo[0],
+        fileName: files.introductionvideo[0].originalname,
+        folder: 'videos/',
+      });
+      payload.introductionvideo = introductionVideo;
+    }
+
+    if (files && files?.ugcExampleVideo && files?.ugcExampleVideo?.length > 0) {
+      const ugcExampleVideo: any = await uploadManyToS3(
+        files.ugcExampleVideo,
+        'videos/',
+      );
+      payload.ugcExampleVideo = ugcExampleVideo;
+    }
+
+    if (files && files?.profile && files?.profile?.length > 0) {
+      const image = files.profile[0].path.replace(/^public[\\/]/, '');
+      payload.profile = imageUrlGenarate(image);
+    }
+
+    const userUpdate = await User.findByIdAndUpdate(userId, {fullName: payload.fullName, profile:payload.profile, phone:payload.phone}, {new:true})
+    console.log('userUpdate', userUpdate);
+
+
+    const result = await Creator.findOneAndUpdate({userId}, payload, { new: true });
+    console.log('result', result);
+    if (!result) {
+      throw new AppError(403, 'Creator updated faild!!');
+    }
+
+    
+
+    if (files) {
+      if (files.introductionvideo && files.introductionvideo.length > 0) {
+        const fileDeletePath = `${files.introductionvideo[0].path}`;
+        await unlink(fileDeletePath);
+      }
+
+      if (files.ugcExampleVideo && files.ugcExampleVideo.length > 0) {
+        const allVideo = files.ugcExampleVideo.map((video:any) => `${video.path}`);
+        await Promise.all(allVideo.map((path:any) => unlink(path)));
+      }
+    }
+    
+
+    return result;
+    
+  } catch (error) {
+
+    console.log('error----', error);
+    const fileDeletePath = `${files.introductionvideo[0].path}`;
+    await unlink(fileDeletePath);
+    const profileDeletePath = `${files.profile[0].path}`;
+    await unlink(profileDeletePath);
+
+    const allVideo = files.ugcExampleVideo.map((video: any) => `${video.path}`);
+    await Promise.all(allVideo.map((path: any) => unlink(path)));
+
+    const key = `videos/${files.introductionvideo[0].originalname}`;
+    await deleteFromS3(key);
+
+    await Promise.all(
+      files.ugcExampleVideo.map((video: any) => {
+        const videoKey = `videos/${video.originalname}`;
+        return deleteFromS3(videoKey);
+      }),
+    );
+
+    throw error;
+    
   }
-
-  const result = await Creator.findByIdAndUpdate(id, payload, { new: true });
-
-  if (!result) {
-    throw new AppError(403, 'Creator updated faild!!');
-  }
-
-  return result;
 };
 
 

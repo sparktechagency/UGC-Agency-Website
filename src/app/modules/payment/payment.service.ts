@@ -179,8 +179,62 @@ const createPaypalPaymentService = async (payload: any) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        return_url: `http://10.0.70.163:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        cancel_url: `http://10.0.70.163:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        return_url: `http://10.10.7.30:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        cancel_url: `http://10.10.7.30:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+      },
+    });
+
+    const response = await paypalClient.execute(request);
+    const approvalUrl = response.result.links.find(
+      (link: any) => link.rel === 'approve',
+    )?.href;
+
+    if (!approvalUrl) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        'PayPal payment creation failed: No approval URL found',
+      );
+    }
+
+    return { url: approvalUrl };
+  } catch (error:any) {
+    console.error('PayPal Payment Error:', error);
+    throw new AppError(error.statusCode, error.message);
+  }
+
+
+};
+
+
+const createPaypalPaymentServiceDirect = async (payload: any) => {
+  console.log('payload==', payload);
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.prefer('return=representation');
+    request.requestBody({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: payload.amount,
+          },
+          // description: `Payment for Campaign: ${result._id}`,
+          custom_id: payload.userId.toString(),
+          // reference_id: ENUM_PAYMENT_PURPOSE.CAMPAIGN_RUN,
+        },
+      ],
+      application_context: {
+        brand_name: 'Your Business Name',
+        landing_page: 'LOGIN',
+        user_action: 'PAY_NOW',
+        // return_url: `${config.paypal.payment_capture_url}`,
+        // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
+        return_url: `http://10.10.7.30:5002/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        cancel_url: `http://10.10.7.30:5002/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
       },
     });
 
@@ -248,8 +302,8 @@ const reniewPaypalPaymentService = async (id:string, userId:string) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        return_url: `http://10.0.70.163:5002/api/v1/payment/reniew-success?subscriptionId=${subscription._id}`,
-        cancel_url: `http://10.0.70.163:5002/api/v1/payment/reniew-cancel?subscriptionId=${subscription._id}`,
+        return_url: `http://10.10.7.30:5002/api/v1/payment/reniew-success?subscriptionId=${subscription._id}`,
+        cancel_url: `http://10.10.7.30:5002/api/v1/payment/reniew-cancel?subscriptionId=${subscription._id}`,
       },
     });
 
@@ -1538,6 +1592,7 @@ const getAllEarningRatio = async (year: number, businessId: string) => {
 export const paymentService = {
   addPaymentService,
   createPaypalPaymentService,
+  createPaypalPaymentServiceDirect,
   reniewPaypalPaymentService,
   refundPaypalPaymentService,
   transferPaypalPaymentService,
