@@ -26,12 +26,12 @@ type SessionData = Stripe.Checkout.Session;
 
 // console.log({ first: config.stripe.stripe_api_secret });
 
-export const stripe = new Stripe(
-  config.stripe.stripe_api_secret as string,
-  //      {
-  //   apiVersion: '2024-09-30.acacia',
-  // }
-);
+// export const stripe = new Stripe(
+//   config.stripe.stripe_api_secret as string,
+//   //      {
+//   //   apiVersion: '2024-09-30.acacia',
+//   // }
+// );
 
 // console.log('stripe==', stripe);
 
@@ -979,56 +979,56 @@ const getBrandEngagement = async (days:string) => {
 
 
 const createCheckout = async (userId: any, payload: any) => {
-  console.log('stripe payment', payload);
-  let session = {} as { id: string };
+  // console.log('stripe payment', payload);
+  // let session = {} as { id: string };
 
 
 
-  const lineItems = [
-    {
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: 'Amount',
-        },
-        unit_amount: Math.round(payload.amount * 100),
-      },
-      quantity: 1,
-    },
-  ];
+  // const lineItems = [
+  //   {
+  //     price_data: {
+  //       currency: 'usd',
+  //       product_data: {
+  //         name: 'Amount',
+  //       },
+  //       unit_amount: Math.round(payload.amount * 100),
+  //     },
+  //     quantity: 1,
+  //   },
+  // ];
 
-  console.log('lineItems=', lineItems);
+  // console.log('lineItems=', lineItems);
 
-  const sessionData: any = {
-    payment_method_types: ['card'],
-    mode: 'payment',
-    success_url: `http://3.114.93.108:8078/api/v1/payment/success`,
-    cancel_url: `http://3.114.93.108:8078/api/v1/payment/cancel`,
-    line_items: lineItems,
-    metadata: {
-      userId: String(userId),
-      orderId: String(payload.orderId),
-      cartIds: JSON.stringify(payload.cartIds),
-    },
-  };
+  // const sessionData: any = {
+  //   payment_method_types: ['card'],
+  //   mode: 'payment',
+  //   success_url: `http://3.114.93.108:8078/api/v1/payment/success`,
+  //   cancel_url: `http://3.114.93.108:8078/api/v1/payment/cancel`,
+  //   line_items: lineItems,
+  //   metadata: {
+  //     userId: String(userId),
+  //     orderId: String(payload.orderId),
+  //     cartIds: JSON.stringify(payload.cartIds),
+  //   },
+  // };
 
-  console.log('sessionData=', sessionData);
+  // console.log('sessionData=', sessionData);
 
-  try {
-    console.log('try session');
-    session = await stripe.checkout.sessions.create(sessionData);
-    console.log('session==', session);
+  // try {
+  //   console.log('try session');
+  //   session = await stripe.checkout.sessions.create(sessionData);
+  //   console.log('session==', session);
 
-  } catch (error) {
-    console.log('Error', error);
-  }
+  // } catch (error) {
+  //   console.log('Error', error);
+  // }
 
-  console.log('try session 22');
-  const { id: session_id, url }: any = session || {};
+  // console.log('try session 22');
+  // const { id: session_id, url }: any = session || {};
 
-  console.log({ url });
+  // console.log({ url });
 
-  return { url };
+  return '{ url }';
 };
 
 const automaticCompletePayment = async (event: Stripe.Event): Promise<void> => {
