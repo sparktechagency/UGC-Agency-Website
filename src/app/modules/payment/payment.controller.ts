@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
-import { paymentService, stripe } from './payment.service';
+import { paymentService } from './payment.service';
 import sendResponse from '../../utils/sendResponse';
 import Stripe from 'stripe';
 import AppError from '../../error/AppError';
@@ -781,24 +781,24 @@ const createCheckout = catchAsync(async (req, res) => {
 });
 
 const conformWebhook = catchAsync(async (req, res) => {
-  // console.log('wabook hit hoise controller')
-  const sig = req.headers['stripe-signature'];
-  let event: Stripe.Event;
-  try {
-    // Verify the event using Stripe's library
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig as string,
-      config.WEBHOOK,
-    );
+  // // console.log('wabook hit hoise controller')
+  // const sig = req.headers['stripe-signature'];
+  // let event: Stripe.Event;
+  // try {
+  //   // Verify the event using Stripe's library
+  //   event = stripe.webhooks.constructEvent(
+  //     req.body,
+  //     sig as string,
+  //     config.WEBHOOK,
+  //   );
 
-    await paymentService.automaticCompletePayment(event);
-  } catch (err) {
-    console.error('Error verifying webhook signature:', err);
-    // res.status(400).send('Webhook Error');
-    throw new AppError(httpStatus.BAD_REQUEST, 'Webhook Error');
-    // return;
-  }
+  //   await paymentService.automaticCompletePayment(event);
+  // } catch (err) {
+  //   console.error('Error verifying webhook signature:', err);
+  //   // res.status(400).send('Webhook Error');
+  //   throw new AppError(httpStatus.BAD_REQUEST, 'Webhook Error');
+  //   // return;
+  // }
 });
 
 
