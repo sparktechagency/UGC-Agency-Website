@@ -5,14 +5,18 @@ import sendResponse from '../../utils/sendResponse';
 import { storeFile } from '../../utils/fileHelper';
 
 import httpStatus from 'http-status';
+import { imageUrlGenarate } from '../../utils/imageUrl';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
   // console.log("user body", req.body);
  
 
   if (req?.file) {
-    req.body.profile = storeFile('profile', req?.file?.filename);
+    const storedPath = storeFile('profile', req?.file?.filename);
+    req.body.profile = imageUrlGenarate(storedPath);
   }
+
+
 
   
   const createUserToken = await userService.createUserToken(req.body);

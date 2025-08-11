@@ -16,5 +16,5 @@ export const deleteFile = async (path: string) => {
 };
 
 export const storeFile = (folderName: string, filename: string) => {
-  return `/uploads/${folderName}/${filename}`;
+  return `uploads/${folderName}/${filename}`;
 };
