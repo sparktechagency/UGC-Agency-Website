@@ -1109,7 +1109,13 @@ const getAllHireCreatorQuery = async (query: Record<string, unknown>) => {
       ),
     query,
   )
-    .search([])
+    .search([
+      'userId.fullName',
+      'brandInfo.name',
+      'brandInfo.email',
+      'brandInfo.phone',
+      'brandInfo.productName',
+    ])
     .filter()
     .sort()
     .paginate()
