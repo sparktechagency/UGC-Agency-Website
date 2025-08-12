@@ -3,9 +3,11 @@ import auth from '../../middleware/auth';
 import { USER_ROLE } from '../user/user.constants';
 import fileUpload from '../../middleware/fileUpload';
 import { uploadVideoController } from './uploadVideo.controller';
+import s3FileUpload from '../../middleware/s3FileUpload';
 
 const uploadVideoRouter = express.Router();
 const upload = fileUpload('./public/uploads/video');
+// const upload = s3FileUpload('./public/uploads/video');
 
 uploadVideoRouter
   .post(

@@ -48,6 +48,7 @@ const createUploadVideo = async (files: any, payload: TUploadVideo) => {
 
     }
   } catch (error) {
+    console.log('error', error);
     try {
         const allVideo = files?.videos?.map((video: any) => `${video.path}`);
         await Promise.all(allVideo?.map((path: any) => unlink(path)));

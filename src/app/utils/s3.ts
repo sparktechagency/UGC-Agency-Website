@@ -121,6 +121,8 @@ export const uploadManyToS3 = async (
   folder: string,
 ): Promise<{ url: string; key: string }[]> => {
   try {
+
+    console.log('files==/---++++', files);
     
   // const newFileName = createNewFileName();
     // const checkPromises = files.map(async (file) => {
@@ -147,13 +149,10 @@ export const uploadManyToS3 = async (
     // });
 
     // await Promise.all(checkPromises);
-    const uploadPromises = files.map(async ({ path, originalname, mimetype }) => {
+    const uploadPromises = files.map(async ({ path, originalname, mimetype,  }) => {
       const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 100000)}-${originalname}`;
       const fileKey = `${folder}${uniqueName}`;
         const uniqueKey = `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
-      // const newkeyName = `${Math.floor(100000 + Math.random() * 900000)}${Date.now()}`;
-      // const newFileName = createNewFileName(originalname);
-      // const fileKey = `${folder}${newFileName}`;
       const command = new PutObjectCommand({
         Bucket: config.aws.bucket,
         Key: fileKey,

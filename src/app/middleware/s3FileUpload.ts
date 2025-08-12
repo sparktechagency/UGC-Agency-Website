@@ -9,7 +9,7 @@ const s3FileUpload = (uploadDirectory: string) => {
 
   const upload = multer({
     storage,
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit for video files
+    limits: { fileSize: 100 * 1024 * 1024 }, // 50 MB limit for video files
     fileFilter: (req: Request, file, cb) => {
       const allowedMimeTypes = [
         'image/gif',
