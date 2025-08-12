@@ -30,15 +30,29 @@ app.use(express.urlencoded({ extended: true }));
 //parsers
 app.use(express.json());
 app.use(cookieParser());
+// app.use(
+//   cors({
+//     origin: '*',
+//     // origin: ['http://10.10.7.22:3011'],
+//     // origin: 'https://memorial-moments-website.vercel.app',
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+//   }),
+// );
+
 app.use(
   cors({
-    origin: '*',
-    // origin: ['http://10.10.7.22:3011'],
-    // origin: 'https://memorial-moments-website.vercel.app',
+    origin: [
+      'https://thesocialchance.com',
+      'https://dashboard.thesocialchance.com',
+      "http://10.10.7.22:3001",
+      "http://10.10.7.22:3000"
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   }),
 );
+
 
 // Remove duplicate static middleware
 // app.use(app.static('public'));
