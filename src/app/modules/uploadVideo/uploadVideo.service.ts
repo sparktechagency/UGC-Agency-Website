@@ -17,6 +17,7 @@ const createUploadVideo = async (files: any, payload: TUploadVideo) => {
     if(isExist){
       if (files.videos && files.videos.length > 0) {
         const videos: any = await uploadManyToS3(files.videos, 'videos/');
+        console.log('videos', videos);
         payload.videos = videos;
       }
 

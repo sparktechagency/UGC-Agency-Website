@@ -37,8 +37,9 @@ export const uploadToS3 = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { file, fileName, folder }: { file: any; fileName: string; folder: string },
 ): Promise<string | null> => {
-  const newFileName = createNewFileName(fileName);
-  const fileKey = `${folder}${newFileName}`;
+  // const newFileName = createNewFileName(fileName);
+  const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 100000)}-${fileName}`;
+  const fileKey = `${folder}${uniqueName}`;
 
   try {
 
@@ -48,17 +49,17 @@ export const uploadToS3 = async (
     });
     console.log('headCommand', headCommand);
 
-    try {
-     const headResult = await s3Client.send(headCommand);
-     if(headResult.$metadata.httpStatusCode === 200){
-       throw new AppError(httpStatus.CONFLICT, 'File with this name already exists.');
-     }
+    // try {
+    //  const headResult = await s3Client.send(headCommand);
+    //  if(headResult.$metadata.httpStatusCode === 200){
+    //    throw new AppError(httpStatus.CONFLICT, 'File with this name already exists.');
+    //  }
 
-    } catch (headError: any) {
-      if (headError.statusCode === httpStatus.CONFLICT) {
-        throw new AppError(headError.statusCode, headError.message);
-      }
-    }
+    // } catch (headError: any) {
+    //   if (headError.statusCode === httpStatus.CONFLICT) {
+    //     throw new AppError(headError.statusCode, headError.message);
+    //   }
+    // }
 
     const uploadCommand = new PutObjectCommand({
       Bucket: config.aws.bucket,
@@ -78,7 +79,7 @@ export const uploadToS3 = async (
 
     console.log('upload result==', uploadResult);
 
-    const url = `https://${config.aws.bucket}.s3.${config.aws.region}.amazonaws.com/${folder}${newFileName}`;
+    const url = `https://${config.aws.bucket}.s3.${config.aws.region}.amazonaws.com/${fileKey}`;
 
     return url;
   } catch (error: any) {
@@ -122,34 +123,37 @@ export const uploadManyToS3 = async (
   try {
     
   // const newFileName = createNewFileName();
-    const checkPromises = files.map(async (file) => {
-      const fileKey = `${folder}${file.originalname}12`;
-      const headCommand = new HeadObjectCommand({
-        Bucket: config.aws.bucket,
-        Key: fileKey,
-      });
+    // const checkPromises = files.map(async (file) => {
+    //   const fileKey = `${folder}${file.originalname}12`;
+    //   const headCommand = new HeadObjectCommand({
+    //     Bucket: config.aws.bucket,
+    //     Key: fileKey,
+    //   });
 
-      try {
-      const headResult =  await s3Client.send(headCommand);
-      if (headResult.$metadata.httpStatusCode === 200){
-        throw new AppError(
-          httpStatus.CONFLICT,
-          `Upload failed: File '${file.originalname}' already exists.`,
-        );
-      }
+    //   try {
+    //   const headResult =  await s3Client.send(headCommand);
+    //   if (headResult.$metadata.httpStatusCode === 200){
+    //     throw new AppError(
+    //       httpStatus.CONFLICT,
+    //       `Upload failed: File '${file.originalname}' already exists.`,
+    //     );
+    //   }
       
-      } catch (headError: any) {
-        if (headError.statusCode === httpStatus.CONFLICT) {
-          throw new AppError(headError.statusCode, headError.message);
-        }
-      }
-    });
+    //   } catch (headError: any) {
+    //     if (headError.statusCode === httpStatus.CONFLICT) {
+    //       throw new AppError(headError.statusCode, headError.message);
+    //     }
+    //   }
+    // });
 
-    await Promise.all(checkPromises);
+    // await Promise.all(checkPromises);
     const uploadPromises = files.map(async ({ path, originalname, mimetype }) => {
-      const newkeyName = `${Math.floor(100000 + Math.random() * 900000)}${Date.now()}`;
-      const newFileName = createNewFileName(originalname);
-      const fileKey = `${folder}${newFileName}`;
+      const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 100000)}-${originalname}`;
+      const fileKey = `${folder}${uniqueName}`;
+        const uniqueKey = `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
+      // const newkeyName = `${Math.floor(100000 + Math.random() * 900000)}${Date.now()}`;
+      // const newFileName = createNewFileName(originalname);
+      // const fileKey = `${folder}${newFileName}`;
       const command = new PutObjectCommand({
         Bucket: config.aws.bucket,
         Key: fileKey,
@@ -164,8 +168,8 @@ export const uploadManyToS3 = async (
           `File Upload failed for '${originalname}'`);
       }
 
-      const url = `https://${config.aws.bucket}.s3.${config.aws.region}.amazonaws.com/${folder}${newFileName}`;
-      return { url, key: newkeyName };
+      const url = `https://${config.aws.bucket}.s3.${config.aws.region}.amazonaws.com/${fileKey}`;
+      return { url, key: uniqueKey };
     });
 
     const uploadedUrls = await Promise.all(uploadPromises);
