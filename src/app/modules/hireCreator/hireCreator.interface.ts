@@ -69,6 +69,9 @@ export type TBrand = {
   status: string;
   paymentStatus: string;
   takeVideoCount: number;
+  creatorReviewStatus: boolean;
+  userReviewStatus: boolean;
+  revisionCount: number;
   creatorId?: Types.ObjectId;
   creatorUserId?: Types.ObjectId;
   creatorPaymentStatus: string;

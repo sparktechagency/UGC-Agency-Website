@@ -50,7 +50,7 @@ paymentRouter
   .get('/all-income-rasio-by-days', paymentController.getAllIncomeRasioBydays)
   .get(
     '/all-earning-rasio',
-    auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     paymentController.getAllEarningRasio,
   )
 

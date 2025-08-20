@@ -17,6 +17,8 @@ export interface TUserCreate {
   phone: string;
   role: (typeof USER_ROLE)[keyof typeof USER_ROLE];
   address: string;
+  rating: number;
+  reviews: number;
 }
 
 export interface TUser extends TUserCreate {

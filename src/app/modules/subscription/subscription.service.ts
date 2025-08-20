@@ -10,7 +10,6 @@ import Package from '../package/package.model';
 import { calculateEndDate } from './subcription.utils';
 import mongoose from 'mongoose';
 import { Payment } from '../payment/payment.model';
-import e from 'express';
 
 
 const createSubscription = async (payload: any, session?: any) => {
@@ -64,9 +63,9 @@ const createSubscription = async (payload: any, session?: any) => {
         $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
       }).session(createdSession);
 
-      if (runningubscription) {
-        throw new AppError(400, 'Your Subscription is already running!');
-      }
+      // if (runningubscription) {
+      //   throw new AppError(400, 'Your Subscription is already running!');
+      // }
       payload.price = existingPackage.price;
       payload.videoCount = existingPackage.videoCount;
       payload.type = existingPackage.type;

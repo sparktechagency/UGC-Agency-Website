@@ -107,6 +107,9 @@ const hireCreatorSchema = new Schema(
       default: 'pending',
     },
     takeVideoCount: { type: Number, required: true, default: 0 },
+    creatorReviewStatus: { type: Boolean, default: false },
+    userReviewStatus: { type: Boolean, default: false },
+    revisionCount: { type: Number, default: 1 },
     creatorId: { type: Schema.Types.ObjectId, ref: 'Creator', required: false },
     creatorUserId: {
       type: Schema.Types.ObjectId,

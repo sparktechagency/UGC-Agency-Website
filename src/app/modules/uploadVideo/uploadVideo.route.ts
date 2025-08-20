@@ -12,7 +12,7 @@ const upload = fileUpload('./public/uploads/video');
 uploadVideoRouter
   .post(
     '/create',
-    //  auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     upload.fields([{ name: 'videos', maxCount: 5 }]),
     // (req, res) => {
     //     console.log('req.files', req.files);

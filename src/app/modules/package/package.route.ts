@@ -11,7 +11,7 @@ const upload = fileUpload('./public/uploads/package');
 packageRouter
   .post(
     '/create-package',
-    //  auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     upload.fields([{ name: 'image', maxCount: 1 }]),
     packageController.createPackage,
   )

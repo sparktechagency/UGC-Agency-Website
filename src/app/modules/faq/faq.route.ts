@@ -9,7 +9,7 @@ const faqRouter = express.Router();
 faqRouter
   .post(
     '/create-faq',
-    //  auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     faqController.createFaq,
   )
   .get(
@@ -20,12 +20,12 @@ faqRouter
   .get('/:id', faqController.getSingleFaq)
   .patch(
     '/:id',
-    //  auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     faqController.updateSingleFaq,
   )
   .delete(
     '/:id',
-    // auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     faqController.deleteSingleFaq,
   );
 

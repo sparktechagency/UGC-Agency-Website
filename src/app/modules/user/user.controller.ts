@@ -52,6 +52,17 @@ const creatorUser = catchAsync(async (req, res) => {
     data: newUser,
   });
 });
+const switchRoleUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const newUser = await userService.switchRoleUser(id);
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Switch role successfully!!',
+    data: newUser,
+  });
+});
 
 // const userSwichRole = catchAsync(async (req, res) => {
 //   const { userId } = req.user;
@@ -174,6 +185,7 @@ export const userController = {
   createUser,
   userCreateVarification,
   creatorUser,
+  switchRoleUser,
   // userSwichRole,
   getUserById,
   getMyProfile,

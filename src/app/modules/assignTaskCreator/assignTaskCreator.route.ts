@@ -11,12 +11,12 @@ const upload = fileUpload('./public/uploads/uploadVideos');
 assignTaskCreatorRouter
   .post(
     '/create-assign-task-creator',
-     auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.createAssignTaskCreator,
   )
   .get(
     '/',
-     auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.getAllAssignTaskCreator,
   )
   .get(
@@ -36,7 +36,7 @@ assignTaskCreatorRouter
   )
   .patch(
     '/approved/:id',
-     auth(USER_ROLE.ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.singleAssignTaskCreatorApprovedByAdmin,
   )
   // .patch(

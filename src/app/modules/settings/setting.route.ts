@@ -8,7 +8,7 @@ const settingsRouter = express.Router();
 settingsRouter
   .post(
     '/',
-    auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.SUB_ADMIN),
     settingsController.addSetting,
   )
   .get('/', settingsController.getSettings)

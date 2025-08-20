@@ -249,6 +249,40 @@ const { role, email, fullName, password, ...rest } = payload;
   return user;
 };
 
+const switchRoleUser = async (id: string) => {
+  const swichUser = await User.findById(id);
+  // console.log('swichUser', swichUser);
+
+  if (!swichUser) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+  }
+  // console.log('as role', swichUser.asRole)
+  let swichRole;
+  if (swichUser.role == 'user') {
+    swichRole = 'sub_admin';
+  } else {
+    swichRole = 'user';
+  }
+
+  console.log('swichRole', swichRole);
+
+  const user = await User.findByIdAndUpdate(
+    id,
+    { role: swichRole },
+    { new: true },
+  );
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User swich failed');
+  }
+
+  return user;
+};
+
+
+
+
+
 // const userSwichRoleService = async (id: string) => {
 //   const swichUser = await User.findById(id);
 //   // console.log('swichUser', swichUser);
@@ -493,7 +527,7 @@ const blockedUser = async (id: string, userId: string) => {
   if (existUser.role === blocker.role) {
     throw new AppError(httpStatus.FORBIDDEN, 'You cannot block this Person!!');
   }
-  if (existUser.role === 'super_admin') {
+  if (existUser.role === 'super_admin' || blocker.role === 'admin') {
     throw new AppError(httpStatus.FORBIDDEN, 'You cannot block this Person!!');
   }
 
@@ -516,6 +550,7 @@ export const userService = {
   createUserToken,
   otpVerifyAndCreateUser,
   creatorUserService,
+  switchRoleUser,
   // userSwichRoleService,
   getUserById,
   getUserByEmail,

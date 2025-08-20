@@ -10,7 +10,7 @@ const reviewRouter = express.Router();
 reviewRouter
   .post(
     '/',
-    auth(USER_ROLE.USER),
+    auth(USER_ROLE.USER, USER_ROLE.CREATOR),
     // validateRequest(videoValidation.VideoSchema),
     reviewController.createReview,
   )

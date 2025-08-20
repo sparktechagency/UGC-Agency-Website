@@ -22,6 +22,7 @@ import hireCreatorRouter from '../modules/hireCreator/hireCreator.route';
 import uploadVideoRouter from '../modules/uploadVideo/uploadVideo.route';
 import assignTaskCreatorRouter from '../modules/assignTaskCreator/assignTaskCreator.route';
 import contactUsRouter from '../modules/contactUs/contactUs.route';
+import ugcContentRouter from '../modules/ugcContent/ugcContent.route';
 
 const router = Router();
 
@@ -121,6 +122,10 @@ const moduleRoutes = [
   {
     path: '/contact-us',
     route: contactUsRouter,
+  },
+  {
+    path: '/ugc-content',
+    route: ugcContentRouter,
   },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

@@ -24,6 +24,13 @@ userRoutes
     userController.userCreateVarification,
   )
   .post('/create-creator', userController.creatorUser)
+  .post(
+    '/roleSwitch/:id',
+    auth(
+      USER_ROLE.ADMIN,
+    ),
+    userController.switchRoleUser,
+  )
   // .post(
   //   '/swich-role',
   //   auth(USER_ROLE.CUSTOMER, USER_ROLE.BUSINESS),

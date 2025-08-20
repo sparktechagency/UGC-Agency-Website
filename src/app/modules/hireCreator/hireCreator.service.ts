@@ -246,19 +246,21 @@ const createHireCreator = async (files: any, payload: any) => {
         //   payload.contentInfo.ugcPhoto = ugcPhoto;
         // }
 
-        const runningPackage = await Subscription.findOne({
-          userId: payload.userId,
-          isDeleted: false,
-          type:"one_time",
-          status: 'pending',
-        });
 
-        if (runningPackage) {
-          throw new AppError(
-            httpStatus.BAD_REQUEST,
-            'You currently have an active package. Please use this package before purchasing a new subscription.',
-          );
-        }
+
+        // const runningPackage = await Subscription.findOne({
+        //   userId: payload.userId,
+        //   isDeleted: false,
+        //   type:"one_time",
+        //   status: 'pending',
+        // });
+
+        // if (runningPackage) {
+        //   throw new AppError(
+        //     httpStatus.BAD_REQUEST,
+        //     'You currently have an active package. Please use this package before purchasing a new subscription.',
+        //   );
+        // }
 
         const subscriptionData = {
           packageId: packageExist._id,
@@ -380,9 +382,9 @@ const createHireCreator = async (files: any, payload: any) => {
         $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
       }).session(session);
 
-      if (runningubscription) {
-        throw new AppError(400, 'Your Subscription is already running!');
-      }
+      // if (runningubscription) {
+      //   throw new AppError(400, 'Your Subscription is already running!');
+      // }
 
 
       const runningPackage:any = await Subscription.findOne({
@@ -727,19 +729,19 @@ const createPackagePurchase = async ( payload: any) => {
         );
       }
 
-      const runningPackage = await Subscription.findOne({
-        userId: payload.userId,
-        isDeleted: false,
-        type: 'one_time',
-        status: 'pending',
-      });
+      // const runningPackage = await Subscription.findOne({
+      //   userId: payload.userId,
+      //   isDeleted: false,
+      //   type: 'one_time',
+      //   status: 'pending',
+      // });
 
-      if (runningPackage) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          'You currently have an active package. Please use this package before purchasing a new subscription.',
-        );
-      }
+      // if (runningPackage) {
+      //   throw new AppError(
+      //     httpStatus.BAD_REQUEST,
+      //     'You currently have an active package. Please use this package before purchasing a new subscription.',
+      //   );
+      // }
 
 
 
@@ -776,16 +778,16 @@ const createPackagePurchase = async ( payload: any) => {
        
       } else {
       console.log('package ');
-      const runningubscription = await Subscription.findOne({
-        userId: payload.userId,
-        isDeleted: false,
-        endDate: { $gt: new Date() },
-        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
-      }).session(session);
+      // const runningubscription = await Subscription.findOne({
+      //   userId: payload.userId,
+      //   isDeleted: false,
+      //   endDate: { $gt: new Date() },
+      //   $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+      // }).session(session);
 
-      if (runningubscription) {
-        throw new AppError(400, 'Your Subscription is already running!');
-      }
+      // if (runningubscription) {
+      //   throw new AppError(400, 'Your Subscription is already running!');
+      // }
 
       const subscriptionData = {
         packageId: packageExist?._id,
@@ -1609,9 +1611,13 @@ const assignTaskRevisionByUser = async (
      
       console.log('payload.revisionText', payload);
 
+      if (hireCreator.revisionCount === 0) {
+        throw new AppError(403, 'Your revision limit is over!!');
+      }
+
       const updateHireCreator = await HireCreator.findByIdAndUpdate(
         id,
-        { status: 'revision', isScript: payload.revisionText },
+        { status: 'revision', isScript: payload.revisionText , revisionCount: hireCreator.revisionCount - 1 },
         { new: true, session },
       );
       console.log('updateHireCreator', updateHireCreator);
