@@ -28,6 +28,8 @@ paymentRouter
     paymentController.transferPaypalPayment,
   )
 
+  .get('/stripe-success', paymentController.successStripePage)
+  .get('/stripe-cancel', paymentController.cancelStripetPage)
   .get('/success', paymentController.successPage)
   .get('/cancel', paymentController.cancelPaymentPage)
   .get('/success-page', paymentController.successPageDirect)

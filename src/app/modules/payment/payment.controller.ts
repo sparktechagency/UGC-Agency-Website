@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
-import { paymentService } from './payment.service';
+import { paymentService, stripe } from './payment.service';
 import sendResponse from '../../utils/sendResponse';
 import Stripe from 'stripe';
 import AppError from '../../error/AppError';
@@ -18,6 +18,8 @@ import { cancelTemplete, successTemplete } from '../../../templete/templete';
 import { calculateEndDate } from '../subscription/subcription.utils';
 import { notificationService } from '../notification/notification.service';
 import Package from '../package/package.model';
+
+
 
 
 const addPayment = catchAsync(async (req, res, next) => {
@@ -306,6 +308,16 @@ const getAllIncomeRasioBydays = catchAsync(async (req, res) => {
 
 //payment
 
+const successStripePage = async (req: Request, res: Response) => {
+  res.send(successTemplete);
+};
+
+
+const cancelStripetPage = async (req: Request, res: Response) => {
+  res.send(cancelTemplete);
+};
+
+
 const successPage = async (req: Request, res: Response) => {
   const { token }: any = req.query;
   const { orderId }: any = req.query;
@@ -336,7 +348,14 @@ const successPage = async (req: Request, res: Response) => {
 
     const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
       orderId,
-      { status: 'pending', paymentStatus: 'paid' },
+      {
+        status: 'pending',
+        paymentStatus: 'paid',
+        brandPrice: Number(
+          captureResponse.result.purchase_units[0].payments.captures[0].amount
+            .value,
+        ),
+      },
       { new: true, session },
     );
 
@@ -421,14 +440,7 @@ const successPage = async (req: Request, res: Response) => {
           { session },
         );
 
-        const key =
-          updateHireCreator.contentInfo.ugcPhoto.split('amazonaws.com/')[1];
-
-        const deleteImage: any = await deleteFromS3(key);
-        console.log('deleteImage', deleteImage);
-        if (!deleteImage) {
-          throw new AppError(404, 'Do not Image Deleted!');
-        }
+        
       }
     }
 
@@ -494,6 +506,7 @@ const cancelPaymentPage = async (req: Request, res: Response) => {
 };
 
 const successPageDirect = async (req: Request, res: Response) => {
+  console.log('direct paypal success page hit hoiese');
   const { token }: any = req.query;
   const { subscriptionId }: any = req.query;
 
@@ -513,7 +526,7 @@ const successPageDirect = async (req: Request, res: Response) => {
 
     console.log(
       'transactionId',
-      captureResponse.result.purchase_units[0].payments.captures[0].id,
+      captureResponse.result.purchase_units[0]?.payments.captures[0]?.id,
     );
 
     if (captureResponse.result.status !== 'COMPLETED') {
@@ -538,7 +551,7 @@ const successPageDirect = async (req: Request, res: Response) => {
       transactionId:
         captureResponse.result.purchase_units[0].payments.captures[0].id,
       transactionDate: new Date(),
-      subscriptionId: subcription._id,
+      subscriptionId: subcription?._id,
     };
     console.log('payment data', paymentData);
 
@@ -566,11 +579,11 @@ const successPageDirect = async (req: Request, res: Response) => {
     }).session(session);
 
     if (subcription) {
-      await Subscription.findByIdAndDelete(subcription._id).session(session);
+      await Subscription.findByIdAndDelete(subcription?._id).session(session);
 
     }
 
-    await Subscription.findByIdAndDelete(subcription._id).session(session);
+    await Subscription.findByIdAndDelete(subcription?._id).session(session);
 
 
     res.status(500).send('An error occurred while processing the payment.');
@@ -781,24 +794,24 @@ const createCheckout = catchAsync(async (req, res) => {
 });
 
 const conformWebhook = catchAsync(async (req, res) => {
-  // // console.log('wabook hit hoise controller')
-  // const sig = req.headers['stripe-signature'];
-  // let event: Stripe.Event;
-  // try {
-  //   // Verify the event using Stripe's library
-  //   event = stripe.webhooks.constructEvent(
-  //     req.body,
-  //     sig as string,
-  //     config.WEBHOOK,
-  //   );
+  // console.log('wabook hit hoise controller')
+  const sig = req.headers['stripe-signature'];
+  let event: Stripe.Event;
+  try {
+    // Verify the event using Stripe's library
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig as string,
+      config.WEBHOOK,
+    );
 
-  //   await paymentService.automaticCompletePayment(event);
-  // } catch (err) {
-  //   console.error('Error verifying webhook signature:', err);
-  //   // res.status(400).send('Webhook Error');
-  //   throw new AppError(httpStatus.BAD_REQUEST, 'Webhook Error');
-  //   // return;
-  // }
+    await paymentService.automaticCompletePayment(event);
+  } catch (err) {
+    console.error('Error verifying webhook signature:', err);
+    // res.status(400).send('Webhook Error');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Webhook Error');
+    // return;
+  }
 });
 
 
@@ -919,6 +932,8 @@ export const paymentController = {
   getAllSubscrptionUserRasioBydays,
   createCheckout,
   conformWebhook,
+  successStripePage,
+  cancelStripetPage,
   successPage,
   cancelPaymentPage,
   successPageDirect,

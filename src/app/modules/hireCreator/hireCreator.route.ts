@@ -11,7 +11,7 @@ hireCreatorRouter
   .post(
     '/create',
     auth(USER_ROLE.USER),
-    upload.fields([{ name: 'ugcPhoto', maxCount: 1 }]),
+    // upload.fields([{ name: 'ugcPhoto', maxCount: 1 }]),
     hireCreatorController.createHireCreator,
   )
   .post(

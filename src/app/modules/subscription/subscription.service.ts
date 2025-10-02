@@ -12,26 +12,111 @@ import mongoose from 'mongoose';
 import { Payment } from '../payment/payment.model';
 
 
+// const createSubscription = async (payload: any, session?: any) => {
+//   console.log('payload==subscription', payload);
+//   // const session = await mongoose.startSession();
+//   let createdSession = session || (await mongoose.startSession());
+//   if (!createdSession.inTransaction()) {
+//     createdSession.startTransaction();
+//   }
+
+//   try {
+//     const user = await User.findById(payload.userId).session(createdSession);
+//     if (!user) {
+//       throw new AppError(404, 'User not found!');
+//     }
+
+//     const existingPackage = await Package.findById(payload.packageId).session(
+//       createdSession,
+//     );
+//     if (!existingPackage) {
+//       throw new AppError(404, 'This Service is not found!');
+//     }
+
+//     if (
+//       existingPackage.type === 'yearly' ||
+//       existingPackage.type === 'monthly'
+//     ) {
+//       const existingSubscription = await Subscription.findOne({
+//         userId: payload.userId,
+//         type: existingPackage.type,
+//         isDeleted: false,
+//       }).session(createdSession);
+
+//       if (existingSubscription) {
+//         throw new AppError(400, 'You already have a Subscription! Please renew it.');
+//       }
+
+//       payload.price = existingPackage.price;
+//       const days = existingPackage.type === 'monthly' ? 30 : 365;
+//       const generateEndDate = calculateEndDate(new Date(), days);
+//       payload.endDate = generateEndDate;
+//       payload.videoCount = existingPackage.videoCount;
+//       payload.type = existingPackage.type;
+//       // payload.status = 'running';
+//     } else {
+//       console.log('subscription service package==');
+//       const runningubscription = await Subscription.findOne({
+//         userId: payload.userId,
+//         isDeleted: false,
+//         endDate: { $gt: new Date() },
+//         $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
+//       }).session(createdSession);
+
+//       // if (runningubscription) {
+//       //   throw new AppError(400, 'Your Subscription is already running!');
+//       // }
+//       payload.price = existingPackage.price;
+//       payload.videoCount = existingPackage.videoCount;
+//       payload.type = existingPackage.type;
+//       // payload.status = 'running';
+//     }
+
+//     const result = await Subscription.create([payload], { session:createdSession });
+//     console.log('result==', result);
+
+
+//    if (result.length === 0) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Subscription create faild!!!!');
+//     }
+
+//     await createdSession.commitTransaction();
+//     // createdSession.endSession();
+
+//     return result[0];
+//   } catch (error) {
+//     if (createdSession.inTransaction()) {
+//       await createdSession.abortTransaction();
+//     }
+//     console.error('Error during subscription creation transaction:', error);
+//     createdSession.endSession();
+//     throw error;
+//   } 
+//   // finally {
+//   //   createdSession.endSession();
+//   // }
+// };
+
 const createSubscription = async (payload: any, session?: any) => {
   console.log('payload==subscription', payload);
-  // const session = await mongoose.startSession();
-  let createdSession = session || (await mongoose.startSession());
-  if (!createdSession.inTransaction()) {
-    createdSession.startTransaction();
-  }
 
-  try {
-    const user = await User.findById(payload.userId).session(createdSession);
+  if (session) {
+    const user = await User.findById(payload.userId).session(session);
     if (!user) {
       throw new AppError(404, 'User not found!');
     }
 
     const existingPackage = await Package.findById(payload.packageId).session(
-      createdSession,
+      session,
     );
     if (!existingPackage) {
       throw new AppError(404, 'This Service is not found!');
     }
+
+    // Set common payload properties
+    payload.price = existingPackage.price;
+    payload.videoCount = existingPackage.videoCount;
+    payload.type = existingPackage.type;
 
     if (
       existingPackage.type === 'yearly' ||
@@ -41,73 +126,82 @@ const createSubscription = async (payload: any, session?: any) => {
         userId: payload.userId,
         type: existingPackage.type,
         isDeleted: false,
-      }).session(createdSession);
+      }).session(session);
 
       if (existingSubscription) {
-        throw new AppError(400, 'You already have a Subscription! Please renew it.');
+        throw new AppError(
+          400,
+          'You already have a Subscription! Please renew it.',
+        );
       }
 
-      payload.price = existingPackage.price;
       const days = existingPackage.type === 'monthly' ? 30 : 365;
       const generateEndDate = calculateEndDate(new Date(), days);
       payload.endDate = generateEndDate;
-      payload.videoCount = existingPackage.videoCount;
-      payload.type = existingPackage.type;
-      // payload.status = 'running';
-    } else {
-      console.log('subscription service package==');
-      const runningubscription = await Subscription.findOne({
-        userId: payload.userId,
-        isDeleted: false,
-        endDate: { $gt: new Date() },
-        $expr: { $lt: ['$takeVideoCount', '$videoCount'] },
-      }).session(createdSession);
-
-      // if (runningubscription) {
-      //   throw new AppError(400, 'Your Subscription is already running!');
-      // }
-      payload.price = existingPackage.price;
-      payload.videoCount = existingPackage.videoCount;
-      payload.type = existingPackage.type;
-      // payload.status = 'running';
     }
 
-   
-
-    const result = await Subscription.create([payload], { session:createdSession });
+    const result = await Subscription.create([payload], { session });
     console.log('result==', result);
 
-  //   const paymentData = {
-  //     userId: user._id,
-  //     method: 'paypal',
-  //     amount: existingPackage.price,
-  //     status: 'paid',
-  //     transactionId: payload.transactionId,
-  //     transactionDate: new Date(),
-  //     subscriptionId: result[0]._id,
-  //   };
-
-  //  const payment = await Payment.create([paymentData], { session });
-
-   if (result.length === 0) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Subscription create faild!!!!');
+    if (!result || result.length === 0) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Subscription creation failed!!!!',
+      );
     }
-
-    await createdSession.commitTransaction();
 
     return result[0];
-  } catch (error) {
-    if (createdSession.inTransaction()) {
-      await createdSession.abortTransaction();
+  } else {
+    const user = await User.findById(payload.userId);
+    if (!user) {
+      throw new AppError(404, 'User not found!');
     }
-    console.error('Error during subscription creation transaction:', error);
-    createdSession.endSession();
-    throw error;
-  } 
-  // finally {
-  //   createdSession.endSession();
-  // }
+
+    const existingPackage = await Package.findById(payload.packageId);
+    if (!existingPackage) {
+      throw new AppError(404, 'This Service is not found!');
+    }
+
+    payload.price = existingPackage.price;
+    payload.videoCount = existingPackage.videoCount;
+    payload.type = existingPackage.type;
+
+    if (
+      existingPackage.type === 'yearly' ||
+      existingPackage.type === 'monthly'
+    ) {
+      const existingSubscription = await Subscription.findOne({
+        userId: payload.userId,
+        type: existingPackage.type,
+        isDeleted: false,
+      });
+
+      if (existingSubscription) {
+        throw new AppError(
+          400,
+          'You already have a Subscription! Please renew it.',
+        );
+      }
+
+      const days = existingPackage.type === 'monthly' ? 30 : 365;
+      const generateEndDate = calculateEndDate(new Date(), days);
+      payload.endDate = generateEndDate;
+    }
+
+    const result = await Subscription.create([payload]);
+    console.log('result==', result);
+
+    if (!result || result.length === 0) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Subscription creation failed!!!!',
+      );
+    }
+
+    return result[0];
+  }
 };
+
 
 
 const getAllMysubscriptionQuery = async (query: Record<string, unknown>, userId: string) => {

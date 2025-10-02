@@ -20,11 +20,9 @@ const createReview = catchAsync(async (req, res) => {
   });
 });
 
-const getReviewByCustomer = catchAsync(async (req, res) => {
-  const { businessId }: any = req.query;
-  const { meta, result } = await reviewService.getAllReviewByBusinessQuery(
+const getReviewByAdmin = catchAsync(async (req, res) => {
+  const { meta, result } = await reviewService.getReviewByAdmin(
     req.query,
-    businessId,
   );
 
   sendResponse(res, {
@@ -76,7 +74,7 @@ const deleteSingleReview = catchAsync(async (req, res) => {
 
 export const reviewController = {
   createReview,
-  getReviewByCustomer,
+  getReviewByAdmin,
   getSingleReview,
   updateSingleReview,
   deleteSingleReview,

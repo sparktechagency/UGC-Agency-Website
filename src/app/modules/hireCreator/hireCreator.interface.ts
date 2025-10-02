@@ -5,55 +5,53 @@ export type TBrandInfo = {
   name: string;
   email: string;
   phone: string;
+  websiteUrl: string;
   productName: string;
-  productLink: string;
-  productType: string;
+  brandPronounceName: string;
+  isScript: string;
+  isVideoCaption: string;
 };
 export type TBrandSocial = {
   tiktokHandle: string;
   tiktokLink: string;
   instragramHandle: string;
   instragramLink: string;
-  websiteLink: string;
+  othersSocialLink: string;
 };
-export type TContentInfo = {
-  additionalFormate: string;
-  videoDuration: string;
-  platForm: string;
-  usageType: string;
-  adHookOrCtaRequest?: string;
-  exampleVideoLink: string;
-  ugcPhoto: string;
+export type TVideoInfo = {
+  productName: string;
+  productLink: string;
+  productType: string;
+  videoType: string;
+  videoLink: string;
+  videoLanguage: string;
+  specificWordsOrFeatures: string;
+  specificWordsNotToUse: string;
+  projectGoal: string;
 };
 
 export type TCharacteristicInfo = {
-  ageRange: string;
   gender: string;
-  location: string;
-  language: string;
-  script: string;
-};
-
-export type TDoAndDonts = {
-  anyWordsNotToUse: string;
-  anySpecificWordsUse: string;
-  howToPronouncebrandName: string;
+  ageRange: string;
+  creatorLocation: string;
   anySpecialRequest: string;
-  expressDelivery: string;
+  targetAudience: string;
+  targetAudienceAgeGroup: string;
+  productSolveForThem: string;
+  topPerformingAdsLast30Days: string;
 };
 
-export type TLastContentInfo = {
-  textOverlay?: string;
-  captions?: string;
-  music: string;
-  extraHook: string;
-  extraCta: string;
-  videoType: string;
-  additionalPerson: string;
-  offSiteAttraction: string;
-  goalOfProject: string;
-  tergetAudience: string;
+export type TAddOns = {
+ isExtraHook: string;
+ isExtraCta: string;
+ isRowFootagePerConcept: string;
+ isOffSiteFilming: string;
+ isUgc5Photos: string;
+ isExpressDelivery: string;
+ isFilmingEssentials: string;
+ isAdditionalPerson: string;
 };
+
 
 
 
@@ -62,20 +60,18 @@ export type TBrand = {
   subscriptionId: Types.ObjectId;
   brandInfo: TBrandInfo;
   brandSocial: TBrandSocial;
-  contentInfo: TContentInfo;
+  videoInfo: TVideoInfo;
   characteristicInfo: TCharacteristicInfo;
-  doAndDonts: TDoAndDonts;
-  lastContentInfo: TLastContentInfo;
+  addOns: TAddOns;
   status: string;
   paymentStatus: string;
   takeVideoCount: number;
-  creatorReviewStatus: boolean;
-  userReviewStatus: boolean;
   revisionCount: number;
   creatorId?: Types.ObjectId;
   creatorUserId?: Types.ObjectId;
   creatorPaymentStatus: string;
   creatorPrice: number;
+  brandPrice: number;
   uploadedFiles: {
     key: string;
     url: string;

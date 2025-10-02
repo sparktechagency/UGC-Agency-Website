@@ -5,7 +5,6 @@ import { subscriptionController } from './subscription.controller';
 import fileUpload from '../../middleware/fileUpload';
 
 const subcriptionRouter = express.Router();
-
 const upload = fileUpload('./public/uploads/subscription');
 
 

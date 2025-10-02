@@ -296,18 +296,26 @@ const singleAssignTaskCreatorApprovedByAdmin = async (id: string) => {
       throw new AppError(404, 'Admin not found!');
     }
     console.log('Admin', admin);
-   
-    const chatCreate = await Chat.create(
-      {
-        participants: [admin._id, assignTaskCreatorProduct.creatorUserId],
-      },
-      { session },
-    );
 
-   
-  if (!chatCreate || chatCreate.length === 0) {
-    throw new AppError(403, 'Chat creation failed!');
-  }   
+    const existChat = await Chat.findOne({
+      participants: {
+        $all: [admin._id, assignTaskCreatorProduct.creatorUserId],
+      },
+    }).session(session); 
+    console.log('existChat', existChat);
+
+    if(!existChat){
+       const chatCreate = await Chat.create(
+         {
+           participants: [admin._id, assignTaskCreatorProduct.creatorUserId],
+         },
+         { session },
+       );
+       if (!chatCreate || chatCreate.length === 0) {
+         throw new AppError(403, 'Chat creation failed!');
+       } 
+    }
+    
    const allDeleteAssignTaskCreator = await AssignTaskCreator.deleteMany({
      hireCreatorId: assignTaskCreatorProduct.hireCreatorId
    })

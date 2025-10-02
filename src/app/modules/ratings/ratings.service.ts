@@ -146,102 +146,22 @@ import HireCreator from '../hireCreator/hireCreator.model';
 // };
 
 const createReviewService = async (userId: string, payload: any) => {
-  try {
-    if (!payload.hireCreatorId) {
-      throw new AppError(400, 'Hire Creator ID is required');
-    }
 
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
-    }
 
-    const hireCreator:any = await HireCreator.findById(payload.hireCreatorId);
-    if (!hireCreator) {
-      throw new AppError(httpStatus.NOT_FOUND, 'HireCreator not found!');
-    }
-
-    let targetUserId: string; 
-    let reviewFieldToUpdate: 'userReviewStatus' | 'creatorReviewStatus';
-
-    if (user.role === 'user') {
-      if (hireCreator.userReviewStatus) {
-        throw new AppError(400, 'You have already reviewed this hireCreator.');
-      }
-     
-      if (userId !== hireCreator.userId.toString()) {
-        throw new AppError(
-          400,
-          'You are not the brand owner of this hireCreator.',
-        );
-      }
-
-      targetUserId = hireCreator.creatorUserId.toString();
-      reviewFieldToUpdate = 'userReviewStatus';
-      payload.userId = userId;
-      payload.creatorId = hireCreator.creatorUserId;
-    } else {
-      if (hireCreator.creatorReviewStatus) {
-        throw new AppError(400, 'You have already reviewed this hireCreator.');
-      }
-
-      if (userId !== hireCreator.creatorUserId.toString()) {
-        throw new AppError(400, 'You are not the creator of this hireCreator.');
-      }
-
-      targetUserId = hireCreator.userId.toString();
-      reviewFieldToUpdate = 'creatorReviewStatus';
-       payload.userId = hireCreator.userId;
-       payload.creatorId = userId;
-    }
-
-    const review = await Review.create(payload);
-    if (!review) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create review.');
-    }
-
-    const targetUser = await User.findById(targetUserId);
-    if (!targetUser) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Target user not found!');
-    }
-
-    const newRating =
-      (targetUser.rating * targetUser.reviews + review.rating) /
-      (targetUser.reviews + 1);
-
-    await User.findByIdAndUpdate(
-      targetUser._id,
-      {
-        $inc: { reviews: 1 },
-        rating: newRating,
-      },
-      { new: true },
-    );
-
-    await HireCreator.findByIdAndUpdate(hireCreator._id, {
-      [reviewFieldToUpdate]: true,
-    });
-
-    return review;
-  } catch (error) {
-    console.error('Error creating review:', error);
-
-    if (error instanceof AppError) throw error;
-
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      'An unexpected error occurred while creating the review.',
-    );
-  }
+  payload.userId = userId;  
+  const review = await Review.create(payload);
+  return review;
 };
 
 
-const getAllReviewByBusinessQuery = async (
+const getReviewByAdmin = async (
   query: Record<string, unknown>,
-  businessId: string,
 ) => {
   const reviewQuery = new QueryBuilder(
-    Review.find({ businessId }).populate('businessId').populate('customerId'),
+    Review.find({}).populate({
+      path: 'userId',
+      select: 'fullName profile email address phone',
+    }),
     query,
   )
     .search([''])
@@ -349,7 +269,7 @@ const deletedReviewQuery = async (id: string, customerId: string) => {
 
 export const reviewService = {
   createReviewService,
-  getAllReviewByBusinessQuery,
+  getReviewByAdmin,
   getSingleReviewQuery,
   updateReviewQuery,
   deletedReviewQuery,

@@ -48,16 +48,7 @@ const userSchema = new Schema<TUser>(
       required: false,
       default: '',
     },
-    rating: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    reviews: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+    
   },
   {
     timestamps: true,

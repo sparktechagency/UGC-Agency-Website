@@ -8,14 +8,9 @@ const reviewSchema = new Schema<TReview>(
       required: true,
       ref: 'User',
     },
-    creatorId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: 'Creator',
-    },
     rating: {
       type: Number,
-      required: true,
+      required: false,
     },
     review: {
       type: String,

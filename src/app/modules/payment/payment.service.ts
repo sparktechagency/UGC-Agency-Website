@@ -26,12 +26,12 @@ type SessionData = Stripe.Checkout.Session;
 
 // console.log({ first: config.stripe.stripe_api_secret });
 
-// export const stripe = new Stripe(
-//   config.stripe.stripe_api_secret as string,
-//   //      {
-//   //   apiVersion: '2024-09-30.acacia',
-//   // }
-// );
+export const stripe = new Stripe(
+  config.stripe.stripe_api_secret as string,
+  //      {
+  //   apiVersion: '2024-09-30.acacia',
+  // }
+);
 
 // console.log('stripe==', stripe);
 
@@ -181,6 +181,8 @@ const createPaypalPaymentService = async (payload: any) => {
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
         return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
         cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `https://10.10.7.107:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `https://10.10.7.107:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
@@ -230,11 +232,15 @@ const createPaypalPaymentServiceDirect = async (payload: any) => {
       application_context: {
         brand_name: 'Your Business Name',
         landing_page: 'LOGIN',
+        // landing_page: 'BILLING',
         user_action: 'PAY_NOW',
+        // payment_method: 'PAYPAL',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        return_url: `https://api.thesocialchance.com/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
-        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
+        // return_url: `https://api.thesocialchance.com/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
+        return_url: `http://10.10.7.107:5002/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
       },
     });
 
@@ -979,419 +985,249 @@ const getBrandEngagement = async (days:string) => {
 
 
 const createCheckout = async (userId: any, payload: any) => {
-  // console.log('stripe payment', payload);
-  // let session = {} as { id: string };
+  console.log('stripe payment', payload);
+  let session = {} as { id: string };
 
 
 
-  // const lineItems = [
-  //   {
-  //     price_data: {
-  //       currency: 'usd',
-  //       product_data: {
-  //         name: 'Amount',
-  //       },
-  //       unit_amount: Math.round(payload.amount * 100),
-  //     },
-  //     quantity: 1,
-  //   },
-  // ];
+  const lineItems = [
+    {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: 'Amount',
+        },
+        unit_amount: Math.round(payload.amount * 100),
+      },
+      quantity: 1,
+    },
+  ];
 
-  // console.log('lineItems=', lineItems);
+  console.log('lineItems=', lineItems);
 
-  // const sessionData: any = {
-  //   payment_method_types: ['card'],
-  //   mode: 'payment',
-  //   success_url: `http://3.114.93.108:8078/api/v1/payment/success`,
-  //   cancel_url: `http://3.114.93.108:8078/api/v1/payment/cancel`,
-  //   line_items: lineItems,
-  //   metadata: {
-  //     userId: String(userId),
-  //     orderId: String(payload.orderId),
-  //     cartIds: JSON.stringify(payload.cartIds),
-  //   },
-  // };
+  const sessionData: any = {
+    payment_method_types: ['card'],
+    mode: 'payment',
+    success_url: `http://10.10.7.107:5002/api/v1/payment/stripe-success`,
+    cancel_url: `http://10.10.7.107:5002/api/v1/payment/stripe-cancel`,
+    line_items: lineItems,
+    metadata: {
+      userId: String(userId),
+      orderId: String(payload.orderId),
+    },
+  };
 
-  // console.log('sessionData=', sessionData);
+  console.log('sessionData=', sessionData);
 
-  // try {
-  //   console.log('try session');
-  //   session = await stripe.checkout.sessions.create(sessionData);
-  //   console.log('session==', session);
+  try {
+    console.log('try session');
+    session = await stripe.checkout.sessions.create(sessionData);
+    console.log('session==', session);
 
-  // } catch (error) {
-  //   console.log('Error', error);
-  // }
+  } catch (error) {
+    console.log('Error', error);
+  }
 
-  // console.log('try session 22');
-  // const { id: session_id, url }: any = session || {};
+  console.log('try session 22');
+  const { id: session_id, url }: any = session || {};
 
-  // console.log({ url });
+  console.log({ url });
 
-  return '{ url }';
+  return { url };
 };
 
 const automaticCompletePayment = async (event: Stripe.Event): Promise<void> => {
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        console.log(
+          'hit hise webhook controller servie checkout.session.completed',
+        );
+        const sessionData = event.data.object as Stripe.Checkout.Session;
+        const {
+          id: sessionId,
+          payment_intent: paymentIntentId,
+          metadata,
+        }: SessionData = sessionData;
+        const orderId = metadata?.orderId as string;
+        const userId = metadata?.userId as string;
+
+        if (!paymentIntentId) {
+          throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'Payment Intent ID not found in session',
+          );
+        }
 
 
-  // try {
-  //   switch (event.type) {
-  //     case 'checkout.session.completed': {
-  //       console.log(
-  //         'hit hise webhook controller servie checkout.session.completed',
-  //       );
-  //       const sessionData = event.data.object as Stripe.Checkout.Session;
-  //       const {
-  //         id: sessionId,
-  //         payment_intent: paymentIntentId,
-  //         metadata,
-  //       }: SessionData = sessionData;
-  //       const orderId = metadata?.orderId as string;
-  //       const userId = metadata?.userId as string;
-  //       const cartIds = JSON.parse(metadata?.cartIds as any);
-  //       console.log('cartIds==', cartIds);
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          paymentIntentId as string,
+        );
 
-  //       if (!paymentIntentId) {
-  //         throw new AppError(
-  //           httpStatus.BAD_REQUEST,
-  //           'Payment Intent ID not found in session',
-  //         );
-  //       }
+        if (!paymentIntent || paymentIntent.amount_received === 0) {
+          throw new AppError(httpStatus.BAD_REQUEST, 'Payment Not Successful');
+        }
 
-  //       const paymentIntent = await stripe.paymentIntents.retrieve(
-  //         paymentIntentId as string,
-  //       );
+        const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
+          orderId,
+          { status: 'pending', paymentStatus: 'paid' },
+          { new: true },
+        );
+        console.log('updateHireCreator', updateHireCreator);
 
-  //       if (!paymentIntent || paymentIntent.amount_received === 0) {
-  //         throw new AppError(httpStatus.BAD_REQUEST, 'Payment Not Successful');
-  //       }
+        if (!updateHireCreator) {
+          throw new Error('HireCreator update failed!');
+        }
+
+        const subscriptioinExist: any = await Subscription.findById(
+          updateHireCreator.subscriptionId,
+        );
+        if (!subscriptioinExist) {
+          throw new Error('Subscription not found!');
+        }
+
+        if (
+          subscriptioinExist.type === 'yearly' ||
+          subscriptioinExist.type === 'monthly'
+        ) {
+          const updateTakeVideoCount =
+            Number(subscriptioinExist.takeVideoCount) +
+            Number(updateHireCreator.takeVideoCount);
+          await Subscription.findByIdAndUpdate(
+            updateHireCreator.subscriptionId,
+            { takeVideoCount: updateTakeVideoCount, status: 'running' },
+            { new: true },
+          );
+        } else {
+          await Subscription.findByIdAndUpdate(
+            updateHireCreator.subscriptionId,
+            {
+              takeVideoCount: subscriptioinExist.videoCount,
+              status: 'running',
+              brandPrice: Number(
+                (paymentIntent.amount_received / 100).toFixed(2),
+              ),
+            },
+            { new: true },
+          );
+        }
+
+        const paymentData = {
+          userId: updateHireCreator.userId,
+          method: 'stripe',
+          amount: Number(
+            (paymentIntent.amount_received / 100).toFixed(2),
+          ),
+          status: 'paid',
+          transactionId: paymentIntent.id,
+          transactionDate: new Date(),
+          subscriptionId: updateHireCreator.subscriptionId,
+        };
+        console.log('payment data', paymentData);
+
+        const payment = await Payment.create(paymentData);
+        console.log('payment', payment);
+        if (!payment) {
+          throw new AppError(httpStatus.BAD_REQUEST, 'Payment not created!');
+        }
+
 
        
-  //       const order = await Order.findByIdAndUpdate(
-  //         orderId,
-  //         { paymentStatus: 'paid', status: 'completed' },
-  //         { new: true },
-  //       );
+       
+        const user = await User.findById(userId);
+        if (!user) {
+          throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+        }
 
-  //       if (!order) {
-  //         throw new AppError(httpStatus.BAD_REQUEST, 'Order not found');
-  //       }
+       
+        await HireCreator.deleteMany({ userId: user._id, status: 'draft' });
+        await Subscription.deleteMany({ userId: user._id, status: 'pending' });
+     
 
-  //       const productlist = await Promise.all(
-  //         order.productList.map(async (product: any) => {
-  //           const singleProduct: any = await Product.findById(
-  //             product.productId,
-  //           );
+        const notificationData = {
+          userId: userId,
+          message: 'Order create successfull!!',
+          type: 'success',
+        };
 
-  //           if (!singleProduct) {
-  //             throw new AppError(404, 'Product is not Found!!');
-  //           }
+        const notificationData1 = {
+          role: 'admin',
+          message: 'New Order create successfull!!',
+          type: 'success',
+        };
 
-  //           if (singleProduct.availableStock < product.quantity) {
-  //             throw new AppError(403, 'Stock is not available!!');
-  //           }
+        const [notification, notification1] = await Promise.all([
+          notificationService.createNotification(notificationData),
+          notificationService.createNotification(notificationData1),
+        ]);
 
-  //           const updatedProduct = await Product.findOneAndUpdate(
-  //             {
-  //               _id: product.productId,
-  //               availableStock: { $gte: product.quantity },
-  //             }, 
-  //             { $inc: { availableStock: -product.quantity } }, 
-  //             { new: true },
-  //           );
+        if (!notification || !notification1) {
+          throw new AppError(404, 'Notification create faild!!');
+        }
 
-  //           if (!updatedProduct) {
-  //             throw new AppError(403, 'Insufficient stock after retry');
-  //           }
+        console.log('Payment completed successfully:', {
+          sessionId,
+          paymentIntentId,
+        });
 
-  //           return updatedProduct;
-  //         }),
-  //       );
+        break;
+      }
 
-  //       console.log('===order', order);
+      case 'checkout.session.async_payment_failed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const clientSecret = session.client_secret;
+        const sessionId = session.id;
 
-  //       const paymentData: any = {
-  //         userId: userId,
-  //         amount: order?.totalAmount,
-  //         method: 'stripe',
-  //         transactionId: paymentIntentId,
-  //         orderId: order?._id,
-  //         status: 'paid',
-  //         session_id: sessionId,
-  //         transactionDate: order?.orderDate,
-  //       };
+        if (!clientSecret) {
+          console.warn('Client Secret not found in session.');
+          throw new AppError(httpStatus.BAD_REQUEST, 'Client Secret not found');
+        }
 
-  //       const payment = await Payment.create(paymentData);
-  //       console.log('===payment', payment);
+        // const payment = await Payment.findOne({ session_id: sessionId });
 
-  //       if (!payment) {
-  //         throw new AppError(
-  //           httpStatus.BAD_REQUEST,
-  //           'Payment record creation failed',
-  //         );
-  //       }
-  //       const user = await User.findById(userId);
-  //       if (!user) {
-  //         throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
-  //       }
+        // if (payment) {
+        //   payment.status = 'Failed';
+        //   await payment.save();
+        //   // console.log('Payment marked as failed:', { clientSecret });
+        // } else {
+        //   console.warn(
+        //     'No Payment record found for Client Secret:',
+        //     clientSecret,
+        //   );
+        // }
 
-  //        const pickupAddress = await PickupAddress.findOne({});
-  //         if (!pickupAddress) {
-  //           throw new AppError(400, 'Pickup Address is not found!');  
-  //         }
-  //         const heightAndWidthAndLength = await calculateShippingBox(order.productList);
-        
-  //         const productItems = await Promise.all(
-  //           order.productList.map(async (productItem: any) => {
-  //             const product = await Product.findById(productItem.productId);
-        
-  //             if (!product) {
-  //               throw new AppError(400, 'Product not found for this cart item');
-  //             }
-        
-  //             return {
-  //               weight: Number(product.weight),
-  //               value: productItem.price,
-  //               quantity: productItem.quantity,
-  //               description: 'string',
-  //             };
-  //           }),
-  //         );
+        break;
+      }
 
-        
-  //           const shipmentRequestData = {
-  //             width: 80 < Math.ceil(heightAndWidthAndLength.avgWidth) ? 80 : Math.ceil(heightAndWidthAndLength.avgWidth), 
-  //             preferred_service_level: 'any:most_efficient',
-  //             // preferred_service_level: 'post_nl:cheapest',
-  //             pickup_address: {
-  //               zip_code: pickupAddress.zip_code,
-  //               street_name: pickupAddress.street_name,
-  //               state_code: pickupAddress.state_code,
-  //               phone_number: pickupAddress.phone_number,
-  //               locality: pickupAddress.locality,
-  //               house_number: pickupAddress.house_number,
-  //               given_name: pickupAddress.given_name,
-  //               family_name: pickupAddress.family_name,
-  //               email_address: pickupAddress.email_address,
-  //               country: pickupAddress.country,
-  //               business: pickupAddress.business,
-  //               address2: pickupAddress.address2,
-  //             },
-  //             personal_message: 'A very personal message',
-  //             // parcelshop_id: 'POST_NL:1234',
-  //             order_lines: productItems,
-  //             meta: {},
-  //             length: 120 < Math.ceil(heightAndWidthAndLength.avgLength) ? 120 : Math.ceil(heightAndWidthAndLength.avgLength), // in centimeters
-  //             kind: 'package',
-  //             is_return: false,
-  //             height: 80 < Math.ceil(heightAndWidthAndLength.avgHeight) ? 80 : Math.ceil(heightAndWidthAndLength.avgHeight), // in centimeters
-  //             drop_off: false,
-  //             description: 'description',
-  //             delivery_address: {
-  //               zip_code: order.zip_code,
-  //               street_name: order.street_name,
-  //               state_code: order.state_code,
-  //               phone_number: order.phone_number,
-  //               locality: order.locality,
-  //               house_number: order.house_number,
-  //               given_name: order.given_name,
-  //               family_name: order.family_name,
-  //               email_address: user.email,
-  //               country: order.country,
-  //               business: order.business,
-  //               address2: order.address2,
-  //             },
-  //             delivery_instructions: 'delivery instructions',
-  //             customer_reference: 'W202301',
-  //           };
-        
-  //           console.log('shipmentRequestData===========', shipmentRequestData);
-        
-           
-        
-  //           // const shipmentRequestBooking = await wearewuunderApiRequest(
-  //           //   'shipments',
-  //           //   'POST',
-  //           //   shipmentRequestData,
-  //           // );
-
-           
-
-  //           try {
-  //             const shipmentRequestBooking = await axios.post(
-  //               'https://api.wearewuunder.com/api/v2/shipments',
-  //               shipmentRequestData,
-  //               {
-  //                 headers: {
-  //                   // Authorization: `Bearer ${config.shipment_key}`,
-  //                   Authorization: `Bearer 7EyVLQIcx2Ul6PISQaTba0Mr96geTdP6`,
-  //                   'Content-Type': 'application/json',
-  //                 },
-  //               },
-  //             );
-
-  //             // const shipmentRequestBooking = await wearewuunderApiRequest(
-  //             //   'shipments',
-  //             //   'POST',
-  //             //   shipmentRequestData,
-  //             // );
-  //             console.log(
-  //               'shipmentRequestBooking==*****',
-  //               shipmentRequestBooking,
-  //             );
-
-  //             if (shipmentRequestBooking.status === 201) {
-  //               const data = {
-  //                 shipmentRequestId: shipmentRequestBooking.data.id,
-  //               };
-
-  //               const shipingApi = await ShipmentRequestApi.create(data);
-  //               console.log('shipingApi', shipingApi);
-  //               const order = await Order.findByIdAndUpdate(
-  //                 orderId,
-  //                 { trackUrl: shipmentRequestBooking.data.track_and_trace_url },
-  //                 { new: true },
-  //               );
-
-  //               if (!order) {
-  //                 throw new AppError(httpStatus.BAD_REQUEST, 'Order not found');
-  //               }
-
-  //               if (!shipingApi) {
-  //                 throw new AppError(400, 'ShipmentRequestApi creqate failed!');
-  //               }
-  //             }
-  //           } catch (error:any) {
-  //             console.log('error==', error);
-
-  //             console.error('Error Response:', {
-  //               status: error.response.status,
-  //               data: error.response.data,
-  //               headers: error.response.headers,
-  //               // url: url,
-  //               // method: method,
-  //               // errors: error.response.data.errors.map(
-  //               //   (errorItem: any) => errorItem.messages,
-  //               // ),
-  //               message: error.response.data[0]?.message,
-  //             });
-
-
-  //             if(error){
-  //               const order = await Order.findByIdAndUpdate(
-  //                 orderId,
-  //                 { error: 'post code is not valid!!' },
-  //                 { new: true },
-  //               );
-  //             }
-              
-  //           }
-
-
-  //       const deletedCartProducts = await Promise.all(
-  //         cartIds.map(async (cartProductId: any) => {
-  //           const isDelete =
-  //             await Cart.findByIdAndDelete(cartProductId);
-  //           if (!isDelete) {
-  //             throw new AppError(404, 'Failed to delete cart product');
-  //           }
-  //         }),
-  //       );
-
-  //       const notificationData = {
-  //         userId: userId,
-  //         message: 'Order create successfull!!',
-  //         type: 'success',
-  //       };
-
-  //       const notificationData1 = {
-  //         role: 'admin',
-  //         message: 'New Order create successfull!!',
-  //         type: 'success',
-  //       };
-
-  //       const [notification, notification1] = await Promise.all([
-  //         notificationService.createNotification(notificationData),
-  //         notificationService.createNotification(notificationData1),
-  //       ]);
-
-  //       if (!notification || !notification1) {
-  //         throw new AppError(404, 'Notification create faild!!');
-  //       }
-
-  //       const deletedServiceBookings = await Order.deleteMany(
-  //         {
-  //           userId,
-  //           status: 'pending',
-  //         }
-  //       );
-  //       console.log('deletedServiceBookings', deletedServiceBookings);
-
-        
-
-  //       console.log('Payment completed successfully:', {
-  //         sessionId,
-  //         paymentIntentId,
-  //       });
-
-  //       break;
-  //     }
-
-  //     case 'checkout.session.async_payment_failed': {
-  //       const session = event.data.object as Stripe.Checkout.Session;
-  //       const clientSecret = session.client_secret;
-  //       const sessionId = session.id;
-
-  //       if (!clientSecret) {
-  //         console.warn('Client Secret not found in session.');
-  //         throw new AppError(httpStatus.BAD_REQUEST, 'Client Secret not found');
-  //       }
-
-  //       // const payment = await Payment.findOne({ session_id: sessionId });
-
-  //       // if (payment) {
-  //       //   payment.status = 'Failed';
-  //       //   await payment.save();
-  //       //   // console.log('Payment marked as failed:', { clientSecret });
-  //       // } else {
-  //       //   console.warn(
-  //       //     'No Payment record found for Client Secret:',
-  //       //     clientSecret,
-  //       //   );
-  //       // }
-
-  //       break;
-  //     }
-
-  //     default:
-  //       // // console.log(`Unhandled event type: ${event.type}`);
-  //       // res.status(400).send();
-  //       return;
-  //   }
-  // } catch (err) {
-  //   console.error('Error processing webhook event:', err);
-  // }
+      default:
+        // // console.log(`Unhandled event type: ${event.type}`);
+        // res.status(400).send();
+        return;
+    }
+  } catch (err) {
+    console.error('Error processing webhook event:', err);
+  }
 };
 
-// const paymentRefundService = async (
-//   amount: number | null,
-//   payment_intent: string,
-// ) => {
-//   const refundOptions: Stripe.RefundCreateParams = {
-//     payment_intent,
-//   };
+const paymentRefundService = async (
+  amount: number | null,
+  payment_intent: string,
+) => {
+  const refundOptions: Stripe.RefundCreateParams = {
+    payment_intent,
+  };
 
-//   // Conditionally add the `amount` property if provided
-//   if (amount) {
-//     refundOptions.amount = Number(amount);
-//   }
+  // Conditionally add the `amount` property if provided
+  if (amount) {
+    refundOptions.amount = Number(amount);
+  }
 
-//   // console.log('refaund options', refundOptions);
+  // console.log('refaund options', refundOptions);
 
-//   const result = await stripe.refunds.create(refundOptions);
-//   // console.log('refund result ', result);
-//   return result;
-// };
+  const result = await stripe.refunds.create(refundOptions);
+  // console.log('refund result ', result);
+  return 'Refund successful.';
+};
 
 const getAllEarningRatio = async (year: number, businessId: string) => {
   const startOfYear = new Date(year, 0, 1);
@@ -1608,7 +1444,7 @@ export const paymentService = {
   createCheckout,
   automaticCompletePayment,
   getAllEarningRatio,
-  //   paymentRefundService,
+    paymentRefundService,
   //   filterBalanceByPaymentMethod,
   //   filterWithdrawBalanceByPaymentMethod,
   //   createStripeAccount,

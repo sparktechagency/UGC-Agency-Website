@@ -1,69 +1,57 @@
 
 import mongoose, { Schema } from 'mongoose';
 
-const brandInfoSchema = new Schema({
+const BrandInfoSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
+  websiteUrl: { type: String, required: true },
   productName: { type: String, required: true },
-  productLink: { type: String, required: true },
-  productType: { type: String, required: true },
+  brandPronounceName: { type: String, required: true },
+  isScript: { type: String, required: false, default: 'no' },
+  isVideoCaption: { type: String, required: true },
 });
 
-const brandSocialSchema = new Schema({
+const BrandSocialSchema = new Schema({
   tiktokHandle: { type: String, required: true },
   tiktokLink: { type: String, required: true },
   instragramHandle: { type: String, required: true },
   instragramLink: { type: String, required: true },
-  websiteLink: { type: String, required: true },
+  othersSocialLink: { type: String, required: true },
 });
 
-const contentInfoSchema = new Schema({
-  additionalFormate: { type: String, required: true },
-  videoDuration: { type: String, required: true },
-  platForm: { type: String, required: true },
-  usageType: { type: String, required: true },
-  adHookOrCtaRequest: { type: String },
-  exampleVideoLink: { type: String, required: true },
-  ugcPhoto: {
-    type: String,
-    required: [true, 'UGC Photo are required'],
-    validate: {
-      validator: function (value: string[]) {
-        return value && value.length > 0;
-      },
-      message: 'At least one File is required',
-    },
-  },
-});
-
-const characteristicInfoSchema = new Schema({
-  ageRange: { type: String, required: true },
-  gender: { type: String, required: true },
-  location: { type: String, required: true },
-  language: { type: String, required: true },
-  script: { type: String, required: true },
-});
-
-const doAndDontsSchema = new Schema({
-  anyWordsNotToUse: { type: String, required: true },
-  anySpecificWordsUse: { type: String, required: true },
-  howToPronouncebrandName: { type: String, required: true },
-  anySpecialRequest: { type: String, required: true },
-  expressDelivery: { type: String, required: true },
-});
-
-const lastContentInfoSchema = new Schema({
-  textOverlay: { type: String },
-  captions: { type: String },
-  music: { type: String, required: true },
-  extraHook: { type: String, required: true },
-  extraCta: { type: String, required: true },
+const VideoInfoSchema = new Schema({
+  productName: { type: String, required: true },
+  productLink: { type: String, required: true },
+  productType: { type: String, required: true },
   videoType: { type: String, required: true },
-  additionalPerson: { type: String, required: true },
-  offSiteAttraction: { type: String, required: true },
-  goalOfProject: { type: String, required: true },
-  tergetAudience: { type: String, required: true },
+  videoLink: { type: String, required: true },
+  videoLanguage: { type: String, required: true },
+  specificWordsOrFeatures: { type: String, required: true },
+  specificWordsNotToUse: { type: String, required: true },
+  projectGoal: { type: String, required: true },
+});
+
+const CharacteristicInfoSchema = new Schema({
+  gender: { type: String, required: true },
+  ageRange: { type: String, required: true },
+  creatorLocation: { type: String, required: true },
+  anySpecialRequest: { type: String, required: true },
+  targetAudience: { type: String, required: true },
+  targetAudienceAgeGroup: { type: String, required: true },
+  productSolveForThem: { type: String, required: true },
+  topPerformingAdsLast30Days: { type: String, required: true },
+});
+
+const AddOnsSchema = new Schema({
+  isExtraHook: { type: String, required: true },
+  isExtraCta: { type: String, required: true },
+  isRowFootagePerConcept: { type: String, required: true },
+  isOffSiteFilming: { type: String, required: true },
+  isUgc5Photos: { type: String, required: true },
+  isExpressDelivery: { type: String, required: true },
+  isFilmingEssentials: { type: String, required: true },
+  isAdditionalPerson: { type: String, required: true },
 });
 
 const uploads = new Schema({
@@ -79,12 +67,11 @@ const hireCreatorSchema = new Schema(
       ref: 'Subscription',
       required: true,
     },
-    brandInfo: { type: brandInfoSchema, required: true },
-    brandSocial: { type: brandSocialSchema, required: true },
-    contentInfo: { type: contentInfoSchema, required: true },
-    characteristicInfo: { type: characteristicInfoSchema, required: true },
-    doAndDonts: { type: doAndDontsSchema, required: true },
-    lastContentInfo: { type: lastContentInfoSchema, required: true },
+    brandInfo: { type: BrandInfoSchema, required: true },
+    brandSocial: { type: BrandSocialSchema, required: true },
+    videoInfo: { type: VideoInfoSchema, required: true },
+    characteristicInfo: { type: CharacteristicInfoSchema, required: true },
+    addOns: { type: AddOnsSchema, required: true },
     status: {
       type: String,
       required: true,
@@ -107,8 +94,6 @@ const hireCreatorSchema = new Schema(
       default: 'pending',
     },
     takeVideoCount: { type: Number, required: true, default: 0 },
-    creatorReviewStatus: { type: Boolean, default: false },
-    userReviewStatus: { type: Boolean, default: false },
     revisionCount: { type: Number, default: 1 },
     creatorId: { type: Schema.Types.ObjectId, ref: 'Creator', required: false },
     creatorUserId: {
@@ -123,6 +108,7 @@ const hireCreatorSchema = new Schema(
       default: 'pending',
     },
     creatorPrice: { type: Number, required: false },
+    brandPrice: { type: Number, required: false },
     uploadedFiles: {
       type: [uploads],
       default: [],
@@ -131,7 +117,6 @@ const hireCreatorSchema = new Schema(
     isScript: {
       type: String,
       required: false,
-      default: null,
     },
   },
   { timestamps: true },

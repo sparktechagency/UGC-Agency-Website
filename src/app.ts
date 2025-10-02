@@ -10,7 +10,7 @@ import notFound from './app/middleware/notfound';
 import router from './app/routes';
 import path from 'path';
 import { serverRunningTemplete } from './templete/templete';
-// import { paymentController } from './app/modules/payment/payment.controller';
+import { paymentController } from './app/modules/payment/payment.controller';
 
 const app: Application = express();
 
@@ -18,12 +18,12 @@ const app: Application = express();
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'ejs');
 
-// app.post(
-//   '/api/v1/ducky-webhook-payment',
-//   express.raw({ type: 'application/json' }),
-//   paymentController.conformWebhook,
-// );
-
+app.post(
+  '/api/v1/payment/the-social-chance-stripe-webhook',
+  express.raw({ type: 'application/json' }),
+  paymentController.conformWebhook,
+);
+// stripe listen --forward-to http://10.10.7.107:5002/api/v1/payment/the-social-chance-stripe-webhook
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 

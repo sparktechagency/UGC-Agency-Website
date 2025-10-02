@@ -7,10 +7,8 @@ const createHireCreator = catchAsync(async (req, res) => {
   const payload = req.body;
   const {userId} = req.user
   payload.userId = userId
-  const imageFiles = req.files as {
-    [fieldname: string]: Express.Multer.File[];
-  };
-  const result = await hireCreatorService.createHireCreator(imageFiles, payload);
+
+  const result = await hireCreatorService.createHireCreator( payload);
 
   sendResponse(res, {
     success: true,
