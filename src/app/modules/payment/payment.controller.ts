@@ -319,6 +319,7 @@ const cancelStripetPage = async (req: Request, res: Response) => {
 
 
 const successPage = async (req: Request, res: Response) => {
+  console.log('successPage hit hoise');
   const { token }: any = req.query;
   const { orderId }: any = req.query;
 
@@ -358,6 +359,9 @@ const successPage = async (req: Request, res: Response) => {
       },
       { new: true, session },
     );
+
+    console.log('updateHireCreator', updateHireCreator);
+
 
     if (!updateHireCreator) {
       throw new Error('HireCreator update failed!');

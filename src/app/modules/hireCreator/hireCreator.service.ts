@@ -1247,7 +1247,9 @@ const getAllHireCreatorByUserQuery = async (
         'revision',
         'completed',
       ],
-    }).select('brandInfo.name brandInfo.email status paymentStatus createdAt'),
+    }).select(
+      'brandInfo.name brandInfo.email status paymentStatus createdAt brandPrice',
+    ),
     query,
   )
     .search([])

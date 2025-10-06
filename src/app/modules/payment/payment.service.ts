@@ -179,10 +179,10 @@ const createPaypalPaymentService = async (payload: any) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
-        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
-        // return_url: `https://10.10.7.107:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        // cancel_url: `https://10.10.7.107:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        return_url: `http://10.10.7.107:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
