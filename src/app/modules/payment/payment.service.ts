@@ -179,10 +179,10 @@ const createPaypalPaymentService = async (payload: any) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        // return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
-        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
-        return_url: `http://10.10.7.107:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
+        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `http://10.10.7.107:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
@@ -237,10 +237,10 @@ const createPaypalPaymentServiceDirect = async (payload: any) => {
         // payment_method: 'PAYPAL',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        // return_url: `https://api.thesocialchance.com/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
-        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
-        return_url: `http://10.10.7.107:5002/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
-        cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
+        return_url: `https://api.thesocialchance.com/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
+        // return_url: `http://10.10.7.107:5002/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        // cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
       },
     });
 
@@ -1008,8 +1008,8 @@ const createCheckout = async (userId: any, payload: any) => {
   const sessionData: any = {
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `http://10.10.7.107:5002/api/v1/payment/stripe-success`,
-    cancel_url: `http://10.10.7.107:5002/api/v1/payment/stripe-cancel`,
+    success_url: `https://api.thesocialchance.com/api/v1/payment/stripe-success`,
+    cancel_url: `https://api.thesocialchance.com/api/v1/payment/stripe-cancel`,
     line_items: lineItems,
     metadata: {
       userId: String(userId),
