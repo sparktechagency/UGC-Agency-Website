@@ -19,6 +19,7 @@ import { Payment } from '../payment/payment.model';
 import { notificationService } from '../notification/notification.service';
 import { CLIENT_RENEG_LIMIT } from 'tls';
 import { configDotenv } from 'dotenv';
+import AssignTaskCreator from '../assignTaskCreator/assignTaskCreator.model';
 
 // const createHireCreator = async ( payload: any) => {
 
@@ -607,7 +608,7 @@ const createHireCreator = async (payload: any) => {
     const packageExist = await Package.findById(payload.packageId).session(
       session,
     );
-    console.log('packageExist=', packageExist);
+    // console.log('packageExist=', packageExist);
 
     if (!packageExist) {
       throw new AppError(httpStatus.NOT_FOUND, 'Package not found');
@@ -628,7 +629,7 @@ const createHireCreator = async (payload: any) => {
       session,
     );
 
-    console.log('subcriptionResult==', subcriptionResult);
+    // console.log('subcriptionResult==', subcriptionResult);
     if (!subcriptionResult) {
       throw new AppError(403, 'Subscription creation failed!!');
     }
@@ -640,12 +641,12 @@ const createHireCreator = async (payload: any) => {
       status: 'completed',
     }).session(session);
 
-    console.log('subscriptioinCompleted', subscriptioinCompleted);
+    // console.log('subscriptioinCompleted', subscriptioinCompleted);
     if (subscriptioinCompleted) {
       throw new AppError(403, 'Subscription already completed!!');
     }
 
-    const hireCreatorData = {
+    const hireCreatorData: any = {
       userId: payload.userId,
       subscriptionId: subcriptionResult._id,
       brandInfo: {
@@ -698,10 +699,15 @@ const createHireCreator = async (payload: any) => {
         isFilmingEssentials: payload.addOns?.isFilmingEssentials,
         isAdditionalPerson: payload.addOns?.isAdditionalPerson,
       },
-      takeVideoCount: payload.takeVideoCount,
+      revisionStatus: 'pending',
     };
 
-    console.log('hireCreatorData======================*****');
+    console.log('payload.brandInfo?.isScript', payload.brandInfo?.isScript);
+    if (payload.brandInfo?.isScript !== 'no') {
+      hireCreatorData.revisionStatus = 'accepted';
+    }
+
+    console.log('hireCreatorData======================*****', hireCreatorData);
     const result = await HireCreator.create([hireCreatorData], { session });
     console.log('before console');
     console.log('result', result);
@@ -1206,8 +1212,6 @@ const getAllHireCreatorQuery = async (query: Record<string, unknown>) => {
     HireCreator.find({})
       .populate({ path: 'userId', select: 'fullName' })
       .populate({ path: 'subscriptionId', select: 'price' })
-      .populate('creatorId')
-      .populate('creatorUserId')
       .select(
         'brandInfo.name brandInfo.email brandInfo.phone brandInfo.productName status paymentStatus',
       ),
@@ -1286,15 +1290,33 @@ const getCreatorAllOrdersQuery = async (
   return { meta, result };
 };
 
+const getAllCreatorByHirecreator = async (
+  query: Record<string, unknown>,
+  userId: String,
+  id: string,
+) => {
+  const HireCreatorQuery = new QueryBuilder(
+    AssignTaskCreator.find({ hireCreatorId: id, hireCreatorUserId: userId }).select(
+      'brandInfo.name brandInfo.email status paymentStatus createdAt creatorId creatorUserId',
+    ),
+    query,
+  )
+    .search([])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await HireCreatorQuery.modelQuery;
+
+  const meta = await HireCreatorQuery.countTotal();
+  return { meta, result };
+};
+
 const getSingleHireCreatorQuery = async (id: string) => {
   const hireCreator: any = await HireCreator.findById(id)
     .populate('userId')
     .populate('subscriptionId')
-    .populate('creatorId')
-    .populate({
-      path: 'creatorUserId',
-      select: 'fullName email address phone',
-    });
   if (!hireCreator) {
     throw new AppError(404, 'HireCreator Not Found!!');
   }
@@ -1589,6 +1611,109 @@ const cancelSingleHireCreator = async (id: String) => {
   }
 };
 
+const assignAddIsScriptByAdmin = async (
+  id: string,
+  userId: string,
+  revisionText: string,
+  status: string,
+) => {
+  const session = await mongoose.startSession();
+
+  console.log('revisionText=====', revisionText);
+
+  try {
+    session.startTransaction();
+    const user = await User.findById(userId).session(session);
+
+    if (!user) {
+      throw new AppError(404, 'User is not found!!');
+    }
+    const hireCreator: any = await HireCreator.findById(id).session(session);
+    if (!hireCreator) {
+      throw new AppError(404, 'Hire Creator is not found!!');
+    }
+
+    if (user.role === 'admin') {
+      if (!revisionText) {
+        throw new AppError(
+          400,
+          'Invalid input parameters: revisionText is required',
+        );
+      }
+
+      if (hireCreator.brandInfo.isScript !== 'no') {
+        throw new AppError(
+          404,
+          'You can not add script!! Because script is already added!!',
+        );
+      }
+      if (hireCreator.revisionStatus === 'script_requiest') {
+        throw new AppError(404, 'you already requested script!!');
+      }
+      if (hireCreator.revisionStatus === 'accepted') {
+        throw new AppError(404, 'Script is already accepted!!');
+      }
+
+      const updateHireCreator = await HireCreator.findByIdAndUpdate(
+        id,
+        {
+          revisionStatus: 'script_requiest',
+          isScript: revisionText,
+        },
+        { new: true, session },
+      );
+
+      if (!updateHireCreator) {
+        throw new AppError(403, 'HireCreator update failed!!');
+      }
+      await session.commitTransaction();
+      session.endSession();
+
+      return updateHireCreator;
+    } else {
+      if (!status || (status !== 'accept' && status !== 'cancel')) {
+        throw new AppError(400, 'Invalid input parameters: status is required');
+      }
+
+      if (hireCreator.revisionStatus !== 'script_requiest') {
+        throw new AppError(404, 'you have not requested script!!');
+      }
+      if (hireCreator.revisionStatus === 'accepted') {
+        throw new AppError(404, 'Script is already accepted!!');
+      }
+
+      const statusNew = status === 'accept' ? 'accepted' : 'cancel';
+
+      const updateHireCreator = await HireCreator.findByIdAndUpdate(
+        id,
+        {
+          revisionStatus: statusNew,
+        },
+        { new: true, session },
+      );
+
+      if (!updateHireCreator) {
+        throw new AppError(403, 'HireCreator update failed!!');
+      }
+      await session.commitTransaction();
+      session.endSession();
+
+      return updateHireCreator;
+    }
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+
+    // console.log('error', error);
+
+    throw new AppError(
+      error.statusCode || 500,
+      error.message || 'Something went wrong!',
+    );
+  }
+};
+
+
 const assignTaskCreatorUploadVideosByCreator = async (
   id: string,
   userId: string,
@@ -1858,6 +1983,8 @@ const assignTaskRevisionByUser = async (
   }
 };
 
+
+
 const assignTaskCreatorReSubmitUploadVideosByCreator = async (
   id: string,
   userId: string,
@@ -1971,9 +2098,9 @@ const deleteSingleHireCreatorVideoDeleteByCreator = async (
     throw new AppError(404, 'HireCreator Not Found!!');
   }
 
-  if (hireCreator.creatorUserId?.toString() !== userId.toString()) {
-    throw new AppError(404, 'You are a not valid creator!!');
-  }
+  // if (hireCreator.creatorUserId?.toString() !== userId.toString()) {
+  //   throw new AppError(404, 'You are a not valid creator!!');
+  // }
 
   const key = payload.videourl.split('amazonaws.com/')[1];
 
@@ -2026,6 +2153,7 @@ export const hireCreatorService = {
   createHireCreator,
   getAllHireCreatorQuery,
   getAllHireCreatorByUserQuery,
+  getAllCreatorByHirecreator,
   getCreatorAllOrdersQuery,
   getSingleHireCreatorQuery,
   updateSingleHireCreatorQuery,
@@ -2033,6 +2161,7 @@ export const hireCreatorService = {
   cancelSingleHireCreator,
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
+  assignAddIsScriptByAdmin,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDeleteByCreator,
   deletedHireCreatorQuery,

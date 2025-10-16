@@ -54,10 +54,10 @@ const AddOnsSchema = new Schema({
   isAdditionalPerson: { type: String, required: true },
 });
 
-const uploads = new Schema({
-  key: { type: String, required: true },
-  url: { type: String, required: true },
-});
+// const uploads = new Schema({
+//   key: { type: String, required: true },
+//   url: { type: String, required: true },
+// });
 
 const hireCreatorSchema = new Schema(
   {
@@ -87,33 +87,39 @@ const hireCreatorSchema = new Schema(
       ],
       default: 'draft',
     },
+    revisionStatus: {
+      type: String,
+      required: true,
+      enum: ['pending', 'script_requiest', 'cancel', 'accepted'],
+      default: 'pending',
+    },
     paymentStatus: {
       type: String,
       required: true,
       enum: ['pending', 'paid', 'Failed'],
       default: 'pending',
     },
-    takeVideoCount: { type: Number, required: true, default: 0 },
+    videoCount: { type: Number, required: true, default: 0 },
     revisionCount: { type: Number, default: 1 },
-    creatorId: { type: Schema.Types.ObjectId, ref: 'Creator', required: false },
-    creatorUserId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: false,
-    },
-    creatorPaymentStatus: {
-      type: String,
-      required: true,
-      enum: ['pending', 'paid', 'failed'],
-      default: 'pending',
-    },
-    creatorPrice: { type: Number, required: false },
+    // creatorId: { type: Schema.Types.ObjectId, ref: 'Creator', required: false },
+    // creatorUserId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: 'User',
+    //   required: false,
+    // },
+    // creatorPaymentStatus: {
+    //   type: String,
+    //   required: true,
+    //   enum: ['pending', 'paid', 'failed'],
+    //   default: 'pending',
+    // },
+    // creatorPrice: { type: Number, required: false },
     brandPrice: { type: Number, required: false },
-    uploadedFiles: {
-      type: [uploads],
-      default: [],
-      required: false,
-    },
+    // uploadedFiles: {
+    //   type: [uploads],
+    //   default: [],
+    //   required: false,
+    // },
     isScript: {
       type: String,
       required: false,

@@ -64,17 +64,18 @@ export type TBrand = {
   characteristicInfo: TCharacteristicInfo;
   addOns: TAddOns;
   status: string;
+  revisionStatus: string;
   paymentStatus: string;
-  takeVideoCount: number;
+  videoCount: number;
   revisionCount: number;
-  creatorId?: Types.ObjectId;
-  creatorUserId?: Types.ObjectId;
-  creatorPaymentStatus: string;
-  creatorPrice: number;
+  // creatorId?: Types.ObjectId;
+  // creatorUserId?: Types.ObjectId;
+  // creatorPaymentStatus: string;
+  // creatorPrice: number;
   brandPrice: number;
-  uploadedFiles: {
-    key: string;
-    url: string;
-  }[];
+  // uploadedFiles: {
+  //   key: string;
+  //   url: string;
+  // }[];
   isScript: string;
 };

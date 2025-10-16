@@ -347,6 +347,15 @@ const successPage = async (req: Request, res: Response) => {
       throw new Error('Payment capture failed');
     }
 
+    const hireCreator: any = await HireCreator.findById(orderId).session(session);
+    
+    const subscriptioinExist: any = await Subscription.findById(
+      hireCreator.subscriptionId,
+    );
+    if (!subscriptioinExist) {
+      throw new Error('Subscription not found!');
+    } 
+
     const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
       orderId,
       {
@@ -356,6 +365,7 @@ const successPage = async (req: Request, res: Response) => {
           captureResponse.result.purchase_units[0].payments.captures[0].amount
             .value,
         ),
+        videoCount: subscriptioinExist.videoCount
       },
       { new: true, session },
     );
@@ -367,12 +377,6 @@ const successPage = async (req: Request, res: Response) => {
       throw new Error('HireCreator update failed!');
     }
 
-    const subscriptioinExist: any = await Subscription.findById(
-      updateHireCreator.subscriptionId,
-    );
-    if (!subscriptioinExist) {
-      throw new Error('Subscription not found!');
-    } 
 
 
     if (

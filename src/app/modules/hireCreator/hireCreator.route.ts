@@ -30,6 +30,11 @@ hireCreatorRouter
     auth(USER_ROLE.CREATOR),
     hireCreatorController.getCreatorAllOrders,
   )
+  .get(
+    '/all-assigned-creators-by-hirecreator/:id',
+    auth(USER_ROLE.USER),
+    hireCreatorController.getAllCreatorByHirecreator,
+  )
   .get('/:id', hireCreatorController.getSingleHireCreator)
   .patch(
     '/:id',
@@ -56,6 +61,11 @@ hireCreatorRouter
     '/revision/:id',
     auth(USER_ROLE.USER),
     hireCreatorController.assignTaskRevisionByUser,
+  )
+  .patch(
+    '/addApprovedCancelIsScript/:id',
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN, USER_ROLE.USER),
+    hireCreatorController.assignAddIsScriptByAdmin,
   )
   .patch(
     '/re-uploadVideos/:id',

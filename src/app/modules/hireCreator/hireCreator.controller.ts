@@ -76,6 +76,24 @@ const getCreatorAllOrders = catchAsync(async (req, res) => {
   });
 });
 
+const getAllCreatorByHirecreator = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const { userId } = req.user;
+  const { meta, result } = await hireCreatorService.getAllCreatorByHirecreator(
+    req.query,
+    userId,
+    id,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    meta: meta,
+    data: result,
+    message: ' All HireCreator orders are requered successful!!',
+  });
+});
+
 const getSingleHireCreator = catchAsync(async (req, res) => {
   const result = await hireCreatorService.getSingleHireCreatorQuery(req.params.id);
 
@@ -130,6 +148,29 @@ const cancelSingleHireCreator = catchAsync(async (req, res) => {
   });
 });
 
+
+const assignAddIsScriptByAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+  const revisionText = req.body.revisionText;
+  const status = req.body.status;
+
+  const result = await hireCreatorService.assignAddIsScriptByAdmin(
+    id,
+    userId,
+    revisionText,
+    status,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single HireCreator add isScript is successful!!',
+  });
+});
+
+
 const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
@@ -180,6 +221,8 @@ const assignTaskRevisionByUser = catchAsync(async (req, res) => {
     message: 'Single HireCreator Revision or deliver is successful!!',
   });
 });
+
+
 
 const assignTaskCreatorReSubmitUploadVideosByCreator = catchAsync(
   async (req, res) => {
@@ -240,12 +283,14 @@ export const hireCreatorController = {
   getAllHireCreator,
   getAllHireCreatorByUser,
   getCreatorAllOrders,
+  getAllCreatorByHirecreator,
   getSingleHireCreator,
   updateSingleHireCreator,
   approvedSingleHireCreator,
   cancelSingleHireCreator,
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
+  assignAddIsScriptByAdmin,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDelete,
   deleteSingleHireCreator,

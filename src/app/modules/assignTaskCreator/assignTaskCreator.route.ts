@@ -14,6 +14,11 @@ assignTaskCreatorRouter
     auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.createAssignTaskCreator,
   )
+  .post(
+    '/finally-create-assign-by-brand-creator',
+    auth(USER_ROLE.USER),
+    assignTaskCreatorController.finallyCreateAssignBrandCreator,
+  )
   .get(
     '/',
     auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
@@ -23,6 +28,11 @@ assignTaskCreatorRouter
     '/assign',
     auth(USER_ROLE.CREATOR, USER_ROLE.USER),
     assignTaskCreatorController.getAssignTaskCreatorByCreatorOrUser,
+  )
+  .get(
+    '/approved-assign-creator/:id',
+    auth(USER_ROLE.USER),
+    assignTaskCreatorController.getAssignTaskCreatorByUser,
   )
   .get('/:id', assignTaskCreatorController.getSingleAssignTaskCreator)
   .get(
@@ -35,9 +45,9 @@ assignTaskCreatorRouter
     assignTaskCreatorController.singleAssignTaskCreatorApprovedCancel,
   )
   .patch(
-    '/approved/:id',
+    '/approved-by-admin',
     auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
-    assignTaskCreatorController.singleAssignTaskCreatorApprovedByAdmin,
+    assignTaskCreatorController.multipleAssignTaskCreatorApprovedByAdmin,
   )
   // .patch(
   //   '/uploadVideos/:id',
@@ -61,6 +71,29 @@ assignTaskCreatorRouter
   //   upload.fields([{ name: 'uploadVideos' }]),
   //   assignTaskCreatorController.assignTaskCreatorReSubmitUploadVideosByCreator,
   // )
+  .patch(
+    '/uploadVideos/:id',
+    auth(USER_ROLE.CREATOR),
+    upload.fields([{ name: 'uploadVideos' }]),
+    assignTaskCreatorController.assignTaskCreatorUploadVideosByCreator,
+  )
+  .patch(
+    '/revision/:id',
+    auth(USER_ROLE.USER),
+    assignTaskCreatorController.assignTaskRevisionByUser,
+  )
+
+  .patch(
+    '/re-uploadVideos/:id',
+    auth(USER_ROLE.CREATOR),
+    upload.fields([{ name: 'uploadVideos' }]),
+    assignTaskCreatorController.assignTaskCreatorReSubmitUploadVideosByCreator,
+  )
+  .delete(
+    '/delete-video/:id',
+    auth(USER_ROLE.CREATOR),
+    assignTaskCreatorController.deleteSingleHireCreatorVideoDelete,
+  )
   .delete(
     '/:id',
     auth(USER_ROLE.CREATOR),

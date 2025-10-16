@@ -28,6 +28,7 @@ const assignTaskCreatorSchema = new Schema<TAssignTaskCreator>(
       enum: [
         'pending',
         'request_approved',
+        'approved_by_admin',
         'approved',
         'cancel',
         'revision',

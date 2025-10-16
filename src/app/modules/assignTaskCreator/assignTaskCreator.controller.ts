@@ -16,6 +16,22 @@ const createAssignTaskCreator = catchAsync(async (req, res) => {
   });
 });
 
+const finallyCreateAssignBrandCreator = catchAsync(async (req, res) => {
+  const creatorsAssign = req.body.creatorsAssign;
+
+  const result =
+    await assignTaskCreatorService.finallyCreateAssignBrandCreator(
+      creatorsAssign,
+    );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'AssignTaskCreator approved successful!!',
+  });
+});
+
 const getAllAssignTaskCreator = catchAsync(async (req, res) => {
   const { meta, result } = await assignTaskCreatorService.getAllAssignTaskCreatorQuery(req.query);
 
@@ -42,6 +58,21 @@ const getAssignTaskCreatorByCreatorOrUser = catchAsync(async (req, res) => {
     meta: meta,
     data: result,
     message: ' All AssignTaskCreator are requered successful!!',
+  });
+});
+
+
+const getAssignTaskCreatorByUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const { meta, result } =
+    await assignTaskCreatorService.getAssignTaskCreatorByUser(req.query, id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    meta: meta,
+    data: result,
+    message: ' All AssignTaskCreator by admin requered successful!!',
   });
 });
 
@@ -91,20 +122,22 @@ const singleAssignTaskCreatorApprovedCancel = catchAsync(async (req, res) => {
 });
 
 
-const singleAssignTaskCreatorApprovedByAdmin = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result =
-    await assignTaskCreatorService.singleAssignTaskCreatorApprovedByAdmin(
-      id
-    );
+const multipleAssignTaskCreatorApprovedByAdmin = catchAsync(
+  async (req, res) => {
+    const ids = req.body.assignTaskCreatorIds;
+    const result =
+      await assignTaskCreatorService.multipleAssignTaskCreatorApprovedByAdmin(
+        ids,
+      );
 
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    data: result,
-    message: 'Single AssignTaskCreator  are Approved successful!!',
-  });
-});
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      data: result,
+      message: 'Multiple AssignTaskCreator  are Approved successful!!',
+    });
+  },
+);
 
 // const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
 //   const { id } = req.params;
@@ -178,6 +211,100 @@ const singleAssignTaskCreatorApprovedByAdmin = catchAsync(async (req, res) => {
 //   },
 // );
 
+const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+  const imageFiles = req.files as {
+    [fieldname: string]: Express.Multer.File[];
+  };
+
+  const result =
+    await assignTaskCreatorService.assignTaskCreatorUploadVideosByCreator(
+      id,
+      userId,
+      imageFiles,
+    );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single AssignTaskCreator  are upload Video successful!!',
+  });
+});
+
+const assignTaskRevisionByUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+  const bodyData = req.body.revisionText;
+  // console.log('bodyData', bodyData);
+  const payload: any = {};
+  if (req.body?.revisionText) {
+    payload['revisionText'] = req.body.revisionText;
+  }
+  if (req.query?.status) {
+    payload['status'] = req.query.status;
+  }
+
+  // console.log('payload****', payload);
+
+  const result = await assignTaskCreatorService.assignTaskRevisionByUser(
+    id,
+    userId,
+    payload,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single HireCreator Revision or deliver is successful!!',
+  });
+});
+
+const assignTaskCreatorReSubmitUploadVideosByCreator = catchAsync(
+  async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.user;
+    const imageFiles = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const result =
+      await assignTaskCreatorService.assignTaskCreatorReSubmitUploadVideosByCreator(
+        id,
+        userId,
+        imageFiles,
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      data: result,
+      message: 'Single AssignTaskCreator  are upload Video successful!!',
+    });
+  },
+);
+const deleteSingleHireCreatorVideoDelete = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+  const videoUrl = req.body;
+
+  const result =
+    await assignTaskCreatorService.deleteSingleHireCreatorVideoDeleteByCreator(
+      id,
+      userId,
+      videoUrl,
+    );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single delete  are upload Video successful!!',
+  });
+});
+
 const deleteSingleAssignTaskCreator = catchAsync(async (req, res) => {
     const {userId} = req.user
   const { id } = req.params;
@@ -193,14 +320,21 @@ const deleteSingleAssignTaskCreator = catchAsync(async (req, res) => {
 
 export const assignTaskCreatorController = {
   createAssignTaskCreator,
+  finallyCreateAssignBrandCreator,
   getAllAssignTaskCreator,
   getAssignTaskCreatorByCreatorOrUser,
+  getAssignTaskCreatorByUser,
   getSingleAssignTaskCreator,
   getSingleHireCreatorToAssignTaskCreator,
   singleAssignTaskCreatorApprovedCancel,
-  singleAssignTaskCreatorApprovedByAdmin,
+  multipleAssignTaskCreatorApprovedByAdmin,
   // assignTaskCreatorUploadVideosByCreator,
   // assignTaskRevisionByUser,
   // assignTaskCreatorReSubmitUploadVideosByCreator,
+  assignTaskCreatorUploadVideosByCreator,
+  assignTaskRevisionByUser,
+  assignTaskCreatorReSubmitUploadVideosByCreator,
+  deleteSingleHireCreatorVideoDelete,
+
   deleteSingleAssignTaskCreator,
 };
