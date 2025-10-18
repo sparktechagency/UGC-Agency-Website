@@ -1323,6 +1323,30 @@ const getSingleHireCreatorQuery = async (id: string) => {
   return hireCreator;
 };
 
+const getAllVideosByHirecreator = async (id: string) => {
+  const hireCreator: any = await HireCreator.findById(id);
+   
+  if (!hireCreator) {
+    throw new AppError(404, 'HireCreator Not Found!!');
+  }
+
+  const allVideos=[];
+
+  const assignCreators = await AssignTaskCreator.find({
+    hireCreatorId: id,
+  }).select('uploadedFiles');
+
+  for (let i = 0; i < assignCreators.length; i++) {
+    for (let j = 0; j < assignCreators[i].uploadedFiles.length; j++) {
+      allVideos.push(assignCreators[i].uploadedFiles[j]);
+    }
+  }
+
+  console.log('allVideos', allVideos);
+
+  return allVideos;
+};
+
 const updateSingleHireCreatorQuery = async (id: string, payload: any) => {
   console.log('id', id);
   console.log('updated payload', payload);
@@ -2154,6 +2178,7 @@ export const hireCreatorService = {
   getAllHireCreatorQuery,
   getAllHireCreatorByUserQuery,
   getAllCreatorByHirecreator,
+  getAllVideosByHirecreator,
   getCreatorAllOrdersQuery,
   getSingleHireCreatorQuery,
   updateSingleHireCreatorQuery,

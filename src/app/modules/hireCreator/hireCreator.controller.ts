@@ -94,6 +94,24 @@ const getAllCreatorByHirecreator = catchAsync(async (req, res) => {
   });
 });
 
+const getAllVideosByHirecreator = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  // const { userId } = req.user;
+  const { meta, result } = await hireCreatorService.getAllVideosByHirecreator(
+    // req.query,
+    // userId,
+    id,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    meta: meta,
+    data: result,
+    message: ' All HireCreator videos are requered successful!!',
+  });
+});
+
 const getSingleHireCreator = catchAsync(async (req, res) => {
   const result = await hireCreatorService.getSingleHireCreatorQuery(req.params.id);
 
@@ -284,6 +302,7 @@ export const hireCreatorController = {
   getAllHireCreatorByUser,
   getCreatorAllOrders,
   getAllCreatorByHirecreator,
+  getAllVideosByHirecreator,
   getSingleHireCreator,
   updateSingleHireCreator,
   approvedSingleHireCreator,

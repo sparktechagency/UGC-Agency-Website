@@ -35,6 +35,11 @@ hireCreatorRouter
     auth(USER_ROLE.USER),
     hireCreatorController.getAllCreatorByHirecreator,
   )
+  .get(
+    '/all-videos-by-hirecreator/:id',
+    // auth(USER_ROLE.USER),
+    hireCreatorController.getAllVideosByHirecreator,
+  )
   .get('/:id', hireCreatorController.getSingleHireCreator)
   .patch(
     '/:id',
