@@ -18,11 +18,12 @@ const createAssignTaskCreator = catchAsync(async (req, res) => {
 
 const finallyCreateAssignBrandCreator = catchAsync(async (req, res) => {
   const creatorsAssign = req.body.creatorsAssign;
+  const hirecreatorId = req.body.hirecreatorId;
 
-  const result =
-    await assignTaskCreatorService.finallyCreateAssignBrandCreator(
-      creatorsAssign,
-    );
+  const result = await assignTaskCreatorService.finallyCreateAssignBrandCreator(
+    creatorsAssign,
+    hirecreatorId,
+  );
 
   sendResponse(res, {
     success: true,
@@ -33,7 +34,8 @@ const finallyCreateAssignBrandCreator = catchAsync(async (req, res) => {
 });
 
 const getAllAssignTaskCreator = catchAsync(async (req, res) => {
-  const { meta, result } = await assignTaskCreatorService.getAllAssignTaskCreatorQuery(req.query);
+  const id: string = req.params.id;
+  const { meta, result } = await assignTaskCreatorService.getAllAssignTaskCreatorQuery(req.query, id);
 
   sendResponse(res, {
     success: true,
@@ -125,9 +127,11 @@ const singleAssignTaskCreatorApprovedCancel = catchAsync(async (req, res) => {
 const multipleAssignTaskCreatorApprovedByAdmin = catchAsync(
   async (req, res) => {
     const ids = req.body.assignTaskCreatorIds;
+    const hirecreatorId = req.body.hirecreatorId;
     const result =
       await assignTaskCreatorService.multipleAssignTaskCreatorApprovedByAdmin(
         ids,
+        hirecreatorId,
       );
 
     sendResponse(res, {
@@ -233,34 +237,7 @@ const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
   });
 });
 
-const assignTaskRevisionByUser = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.user;
-  const bodyData = req.body.revisionText;
-  // console.log('bodyData', bodyData);
-  const payload: any = {};
-  if (req.body?.revisionText) {
-    payload['revisionText'] = req.body.revisionText;
-  }
-  if (req.query?.status) {
-    payload['status'] = req.query.status;
-  }
 
-  // console.log('payload****', payload);
-
-  const result = await assignTaskCreatorService.assignTaskRevisionByUser(
-    id,
-    userId,
-    payload,
-  );
-
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    data: result,
-    message: 'Single HireCreator Revision or deliver is successful!!',
-  });
-});
 
 const assignTaskCreatorReSubmitUploadVideosByCreator = catchAsync(
   async (req, res) => {
@@ -332,7 +309,6 @@ export const assignTaskCreatorController = {
   // assignTaskRevisionByUser,
   // assignTaskCreatorReSubmitUploadVideosByCreator,
   assignTaskCreatorUploadVideosByCreator,
-  assignTaskRevisionByUser,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDelete,
 

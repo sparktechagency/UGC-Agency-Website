@@ -20,7 +20,7 @@ assignTaskCreatorRouter
     assignTaskCreatorController.finallyCreateAssignBrandCreator,
   )
   .get(
-    '/',
+    '/:id',
     auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.getAllAssignTaskCreator,
   )
@@ -77,11 +77,7 @@ assignTaskCreatorRouter
     upload.fields([{ name: 'uploadVideos' }]),
     assignTaskCreatorController.assignTaskCreatorUploadVideosByCreator,
   )
-  .patch(
-    '/revision/:id',
-    auth(USER_ROLE.USER),
-    assignTaskCreatorController.assignTaskRevisionByUser,
-  )
+  
 
   .patch(
     '/re-uploadVideos/:id',

@@ -1901,7 +1901,7 @@ const assignTaskRevisionByUser = async (
   try {
     session.startTransaction();
 
-    if (!payload.revisionText && !payload.status) {
+    if (!payload.status) {
       throw new AppError(
         400,
         'Invalid input parameters: revisionText or status is required',
@@ -1912,7 +1912,7 @@ const assignTaskRevisionByUser = async (
       throw new AppError(400, 'Invalid input parameters');
     }
 
-    if (payload.revisionText) {
+    if (payload.status === 'revision') {
       const hireCreator: any = await HireCreator.findById(id).session(session);
       if (!hireCreator) {
         throw new AppError(404, 'Hire Creator is not found!!');
@@ -1941,16 +1941,26 @@ const assignTaskRevisionByUser = async (
         id,
         {
           status: 'revision',
-          isScript: payload.revisionText,
+          // isScript: payload.revisionText,
+          isForward: false,
           revisionCount: hireCreator.revisionCount - 1,
         },
         { new: true, session },
       );
-      console.log('updateHireCreator', updateHireCreator);
-
       if (!updateHireCreator) {
         throw new AppError(403, 'HireCreator update failed!!');
       }
+
+      const assignCreator = await AssignTaskCreator.updateMany(
+        { hireCreatorId: id },
+        { status: 'revision' },
+        { new: true, session },
+      );
+      if (!assignCreator) {
+        throw new AppError(403, 'assignCreator update failed!!');
+      }
+      console.log('updateHireCreator', updateHireCreator);
+
       await session.commitTransaction();
       session.endSession();
 
@@ -1980,6 +1990,15 @@ const assignTaskRevisionByUser = async (
         { new: true, session },
       );
 
+      const updateAssignCreator: any = await AssignTaskCreator.updateMany(
+        { hireCreatorId: id },
+        { status: 'delivered' },
+        { new: true, session },
+      );
+      if (!updateAssignCreator) {
+        throw new AppError(403, 'Update Assign Creator failed!!');
+      }
+
       const subscriptioinUpdate = await Subscription.findOneAndUpdate(
         { _id: updateHireCreator.subscriptionId },
         { status: 'completed' },
@@ -2005,6 +2024,34 @@ const assignTaskRevisionByUser = async (
       error.message || 'Something went wrong!',
     );
   }
+};
+
+
+const videoForwardByAdmin = async (
+  id: string,
+) => {
+
+  const hireCreator: any = await HireCreator.findById(id);
+  if (!hireCreator) {
+    throw new AppError(404, 'Hire Creator is not found!!');
+  }
+
+  if (hireCreator.status !== 'ongoing') {
+    throw new AppError(404, 'HireCreator is not ongoing!!');
+  }
+
+  const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
+    id,
+    { status: 'completed', isForward: true },
+    { new: true },
+  );
+
+  if (!updateHireCreator) {
+    throw new AppError(403, 'Hire Creator update failed!!');
+  }
+
+  return updateHireCreator;
+
 };
 
 
@@ -2186,6 +2233,7 @@ export const hireCreatorService = {
   cancelSingleHireCreator,
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
+  videoForwardByAdmin,
   assignAddIsScriptByAdmin,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDeleteByCreator,

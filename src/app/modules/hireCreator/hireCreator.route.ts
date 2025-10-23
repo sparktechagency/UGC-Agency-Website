@@ -37,7 +37,7 @@ hireCreatorRouter
   )
   .get(
     '/all-videos-by-hirecreator/:id',
-    // auth(USER_ROLE.USER),
+    auth(USER_ROLE.USER, USER_ROLE.ADMIN),
     hireCreatorController.getAllVideosByHirecreator,
   )
   .get('/:id', hireCreatorController.getSingleHireCreator)
@@ -66,6 +66,11 @@ hireCreatorRouter
     '/revision/:id',
     auth(USER_ROLE.USER),
     hireCreatorController.assignTaskRevisionByUser,
+  )
+  .patch(
+    '/forward-video/:id',
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
+    hireCreatorController.videoForwardByAdmin,
   )
   .patch(
     '/addApprovedCancelIsScript/:id',

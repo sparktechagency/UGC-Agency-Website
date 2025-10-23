@@ -95,12 +95,19 @@ const createAssignTaskCreator = async (payload: any) => {
 
 
 
-const finallyCreateAssignBrandCreator = async (creatorsAssign: any) => {
+const finallyCreateAssignBrandCreator = async (creatorsAssign: any, hirecreatorId: any) => {
   console.log('finally creatorAssign=', creatorsAssign);
 
   if (!Array.isArray(creatorsAssign) || creatorsAssign.length === 0) {
     throw new AppError(400, 'ids must be a non-empty array');
   }
+
+  const existHireCreator = await HireCreator.findById(hirecreatorId);
+  if (!existHireCreator) {
+    throw new AppError(404, 'Hire Creator not found');
+  }
+
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -113,15 +120,6 @@ const finallyCreateAssignBrandCreator = async (creatorsAssign: any) => {
      if (!findVideoCount) {
        throw new AppError(404, 'AssignTaskCreator not found');
      }
-    const existHireCreator = await HireCreator.findById(
-      findVideoCount.hireCreatorId,
-    );
-
-    if(!existHireCreator) {
-      throw new AppError(404, 'Hire Creator not found');
-    }
-    
-
    
     const assignCreatorCount = Number(findVideoCount.videoCount) / 2;
     if (creatorsAssign.length !== assignCreatorCount) {
@@ -131,9 +129,15 @@ const finallyCreateAssignBrandCreator = async (creatorsAssign: any) => {
       );
     }
 
-    const normalizedIds = creatorsAssign.map(
-      (id) => new mongoose.Types.ObjectId(id),
-    );
+    const normalizedIds = creatorsAssign?.map(async (id) => {
+      const isExist = await AssignTaskCreator.findOne({
+        _id: id,
+        hireCreatorId: hirecreatorId,
+      });
+      if (!isExist) {
+        throw new AppError(404, 'AssignTaskCreator not found');
+      }
+    });
 
     const docs = await AssignTaskCreator.find({
       _id: { $in: normalizedIds },
@@ -182,6 +186,36 @@ const finallyCreateAssignBrandCreator = async (creatorsAssign: any) => {
       { session },
     );
 
+    const admin = await User.findOne({ role: 'admin' }).session(session);
+    if (!admin) {
+      throw new AppError(404, 'Admin user not found');
+    }
+
+       const approvedDocs = await AssignTaskCreator.find({
+         _id: { $in: creatorsAssign },
+         status: 'approved',
+       }).session(session);
+
+    // all creators chat create 
+   await Promise.all(
+     approvedDocs.map(async (doc) => {
+       const creatorUserId = doc.creatorUserId;
+
+       // Check if chat already exists in this session
+       const existChat = await Chat.findOne({
+         participants: { $all: [admin._id, creatorUserId] },
+       }).session(session);
+
+       if (!existChat) {
+         const chat = new Chat({
+           participants: [admin._id, creatorUserId],
+         });
+         // save within the session
+         await chat.save({ session });
+       }
+     }),
+   );
+
     await session.commitTransaction();
     session.endSession();
 
@@ -198,9 +232,14 @@ const finallyCreateAssignBrandCreator = async (creatorsAssign: any) => {
   }
 };
 
-const getAllAssignTaskCreatorQuery = async (query: Record<string, unknown>) => {
+
+const getAllAssignTaskCreatorQuery = async (query: Record<string, unknown>, id: string) => {
+  const hireCreator = await HireCreator.findById(id);
+  if (!hireCreator) {
+    throw new AppError(404, 'HireCreator not found');
+  }
   const AssignTaskCreatorQuery = new QueryBuilder(
-    AssignTaskCreator.find({})
+    AssignTaskCreator.find({ hireCreatorId : id })
       // .populate('creatorId')
       // .populate('creatorUserId')
       // .populate('hireCreatorId')
@@ -267,6 +306,11 @@ const getAssignTaskCreatorByUser = async (
   query: Record<string, unknown>,
   id: string,
 ) => {
+
+  const hireCreator = await HireCreator.findById(id);
+  if (!hireCreator) {
+    throw new AppError(404, 'HireCreator not found');
+  }
 
   const assignTaskCreatorQuery = new QueryBuilder(
     AssignTaskCreator.find({ hireCreatorId: id })
@@ -495,16 +539,29 @@ const singleAssignTaskCreatorApprovedCancelQuery = async (
 //   }
 // };
 
-const multipleAssignTaskCreatorApprovedByAdmin = async (ids: any[]) => {
+const multipleAssignTaskCreatorApprovedByAdmin = async (
+  ids: any[],
+  hirecreatorId: string,
+) => {
   if (!Array.isArray(ids) || ids.length === 0) {
     throw new AppError(400, 'ids must be a non-empty array');
+  }
+
+  const existHireCreator = await HireCreator.findById(hirecreatorId);
+  if (!existHireCreator) {
+    throw new AppError(404, 'HireCreator not found');
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const normalizedIds = ids.map((id) => new mongoose.Types.ObjectId(id));
+    const normalizedIds = ids.map(async(id) => {
+      const isExist = await AssignTaskCreator.findOne({_id: id, hireCreatorId: hirecreatorId});
+      if (!isExist) {
+        throw new AppError(404, 'AssignTaskCreator not found');
+      }
+    });
 
     const docs = await AssignTaskCreator.find({
       _id: { $in: normalizedIds },
@@ -543,8 +600,6 @@ const multipleAssignTaskCreatorApprovedByAdmin = async (ids: any[]) => {
 
     await session.commitTransaction();
     session.endSession();
-
-    
 
     return updateResult;
   } catch (error: any) {
@@ -1057,143 +1112,6 @@ const assignTaskCreatorUploadVideosByCreator = async (
 };
 
 
-const assignTaskRevisionByUser = async (
-  id: string,
-  userId: string,
-  payload: any,
-) => {
-  const session = await mongoose.startSession();
-
-  console.log('payload=====', payload);
-
-  try {
-    session.startTransaction();
-
-    if (!payload.status) {
-      throw new AppError(
-        400,
-        'Invalid input parameters: revisionText or status is required',
-      );
-    }
-
-    if (!id || !userId) {
-      throw new AppError(400, 'Invalid input parameters');
-    }
-
-    if (payload.status === 'revision') {
-      const hireCreator: any = await HireCreator.findById(id).session(session);
-      if (!hireCreator) {
-        throw new AppError(404, 'Hire Creator is not found!!');
-      }
-      if (hireCreator.status === 'delivered') {
-        throw new AppError(404, 'AssignTaskCreator is already delivered!!');
-      }
-
-      if (
-        hireCreator.status !== 'completed' ||
-        hireCreator.userId.toString() !== userId.toString()
-      ) {
-        throw new AppError(
-          404,
-          'HireCreator is not completed, you are not the brand creator!!',
-        );
-      }
-
-      console.log('payload.revisionText', payload);
-
-      if (hireCreator.revisionCount === 0) {
-        throw new AppError(403, 'Your revision limit is over!!');
-      }
-
-      const updateHireCreator = await HireCreator.findByIdAndUpdate(
-        id,
-        {
-          status: 'revision',
-          // isScript: payload.revisionText,
-          revisionCount: hireCreator.revisionCount - 1,
-        },
-        { new: true, session },
-      );
-      if (!updateHireCreator) {
-        throw new AppError(403, 'HireCreator update failed!!');
-      }
-
-      const assignCreator = await AssignTaskCreator.updateMany(
-        { hireCreatorId: id },
-        { status: 'revision' },
-        { new: true, session },
-      );
-      if (!assignCreator) {
-        throw new AppError(403, 'assignCreator update failed!!');
-      }
-      console.log('updateHireCreator', updateHireCreator);
-
-      await session.commitTransaction();
-      session.endSession();
-
-      return updateHireCreator;
-    } else if (payload.status && payload.status === 'delivered') {
-      const hireCreator: any = await HireCreator.findById(id).session(session);
-      if (!hireCreator) {
-        throw new AppError(404, 'Hire Creator is not found!!');
-      }
-      if (hireCreator.status === 'delivered') {
-        throw new AppError(404, 'AssignTaskCreator is already delivered!!');
-      }
-
-      if (
-        hireCreator.status !== 'completed' ||
-        hireCreator.userId.toString() !== userId.toString()
-      ) {
-        throw new AppError(
-          404,
-          'HireCreator is not completed, you are not the brand creator!!',
-        );
-      }
-
-      const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
-        id,
-        { status: 'delivered' },
-        { new: true, session },
-      );
-
-      const updateAssignCreator: any = await AssignTaskCreator.updateMany(
-        { hireCreatorId: id },
-        { status: 'delivered' },
-        { new: true, session },
-      );
-      if (!updateAssignCreator) {
-        throw new AppError(403, 'Update Assign Creator failed!!');
-      }
-
-      const subscriptioinUpdate = await Subscription.findOneAndUpdate(
-        { _id: updateHireCreator.subscriptionId },
-        { status: 'completed' },
-        { new: true, session },
-      );
-
-      if (!updateHireCreator) {
-        throw new AppError(403, 'Hire Creator update failed!!');
-      }
-      await session.commitTransaction();
-      session.endSession();
-
-      return updateHireCreator;
-    }
-  } catch (error: any) {
-    await session.abortTransaction();
-    session.endSession();
-
-    // console.log('error', error);
-
-    throw new AppError(
-      error.statusCode || 500,
-      error.message || 'Something went wrong!',
-    );
-  }
-};
-
-
 const assignTaskCreatorReSubmitUploadVideosByCreator = async (
   id: string,
   userId: string,
@@ -1397,7 +1315,6 @@ export const assignTaskCreatorService = {
   // assignTaskRevisionByUser,
   // assignTaskCreatorReSubmitUploadVideosByCreator,
   assignTaskCreatorUploadVideosByCreator,
-  assignTaskRevisionByUser,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDeleteByCreator,
   deletedAssignTaskCreatorQuery,

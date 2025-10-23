@@ -101,6 +101,7 @@ const hireCreatorSchema = new Schema(
     },
     videoCount: { type: Number, required: true, default: 0 },
     revisionCount: { type: Number, default: 1 },
+    isForward: { type: Boolean, default: false },
     // creatorId: { type: Schema.Types.ObjectId, ref: 'Creator', required: false },
     // creatorUserId: {
     //   type: Schema.Types.ObjectId,

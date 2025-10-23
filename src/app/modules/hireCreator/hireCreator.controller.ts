@@ -96,17 +96,14 @@ const getAllCreatorByHirecreator = catchAsync(async (req, res) => {
 
 const getAllVideosByHirecreator = catchAsync(async (req, res) => {
   const id = req.params.id;
-  // const { userId } = req.user;
-  const { meta, result } = await hireCreatorService.getAllVideosByHirecreator(
-    // req.query,
-    // userId,
+  const result  = await hireCreatorService.getAllVideosByHirecreator(
     id,
   );
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    meta: meta,
+    // meta: meta,
     data: result,
     message: ' All HireCreator videos are requered successful!!',
   });
@@ -214,12 +211,9 @@ const assignTaskCreatorUploadVideosByCreator = catchAsync(async (req, res) => {
 const assignTaskRevisionByUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
-  const bodyData = req.body.revisionText;
-  // console.log('bodyData', bodyData);
+  
   const payload: any = {};
-  if (req.body?.revisionText) {
-    payload['revisionText'] = req.body.revisionText;
-  }
+
   if (req.query?.status) {
     payload['status'] = req.query.status;
   }
@@ -237,6 +231,23 @@ const assignTaskRevisionByUser = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     data: result,
     message: 'Single HireCreator Revision or deliver is successful!!',
+  });
+});
+
+
+const videoForwardByAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  
+
+  const result = await hireCreatorService.videoForwardByAdmin(
+    id,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Forward Video successful!!',
   });
 });
 
@@ -309,6 +320,7 @@ export const hireCreatorController = {
   cancelSingleHireCreator,
   assignTaskCreatorUploadVideosByCreator,
   assignTaskRevisionByUser,
+  videoForwardByAdmin,
   assignAddIsScriptByAdmin,
   assignTaskCreatorReSubmitUploadVideosByCreator,
   deleteSingleHireCreatorVideoDelete,

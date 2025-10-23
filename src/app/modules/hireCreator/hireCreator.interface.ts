@@ -68,6 +68,7 @@ export type TBrand = {
   paymentStatus: string;
   videoCount: number;
   revisionCount: number;
+  isForward: boolean;
   // creatorId?: Types.ObjectId;
   // creatorUserId?: Types.ObjectId;
   // creatorPaymentStatus: string;
