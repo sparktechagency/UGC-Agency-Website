@@ -20,21 +20,23 @@ assignTaskCreatorRouter
     assignTaskCreatorController.finallyCreateAssignBrandCreator,
   )
   .get(
+    '/assign',
+    auth(USER_ROLE.CREATOR),
+    assignTaskCreatorController.getAssignTaskCreatorByCreatorOrUser,
+  )
+  .get(
     '/:id',
     auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
     assignTaskCreatorController.getAllAssignTaskCreator,
   )
-  .get(
-    '/assign',
-    auth(USER_ROLE.CREATOR, USER_ROLE.USER),
-    assignTaskCreatorController.getAssignTaskCreatorByCreatorOrUser,
-  )
+
   .get(
     '/approved-assign-creator/:id',
     auth(USER_ROLE.USER),
     assignTaskCreatorController.getAssignTaskCreatorByUser,
   )
-  .get('/:id', assignTaskCreatorController.getSingleAssignTaskCreator)
+  .get('/single/video/:id', assignTaskCreatorController.getSingleAssignTaskCreatorVideo)
+  .get('/single/:id', assignTaskCreatorController.getSingleAssignTaskCreator)
   .get(
     '/hire-creator-to-assign-creator/:id',
     assignTaskCreatorController.getSingleHireCreatorToAssignTaskCreator,
@@ -77,13 +79,17 @@ assignTaskCreatorRouter
     upload.fields([{ name: 'uploadVideos' }]),
     assignTaskCreatorController.assignTaskCreatorUploadVideosByCreator,
   )
-  
 
   .patch(
     '/re-uploadVideos/:id',
     auth(USER_ROLE.CREATOR),
     upload.fields([{ name: 'uploadVideos' }]),
     assignTaskCreatorController.assignTaskCreatorReSubmitUploadVideosByCreator,
+  )
+  .patch(
+    '/creator-payment-by-admin/:id',
+    auth(USER_ROLE.ADMIN, USER_ROLE.SUB_ADMIN),
+    assignTaskCreatorController.creatorPaymentByAdmin,
   )
   .delete(
     '/delete-video/:id',

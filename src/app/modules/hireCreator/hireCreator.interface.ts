@@ -1,5 +1,4 @@
-import { Types } from "mongoose";
-
+import { Types } from 'mongoose';
 
 export type TBrandInfo = {
   name: string;
@@ -42,18 +41,15 @@ export type TCharacteristicInfo = {
 };
 
 export type TAddOns = {
- isExtraHook: string;
- isExtraCta: string;
- isRowFootagePerConcept: string;
- isOffSiteFilming: string;
- isUgc5Photos: string;
- isExpressDelivery: string;
- isFilmingEssentials: string;
- isAdditionalPerson: string;
+  isExtraHook: string;
+  isExtraCta: string;
+  isRowFootagePerConcept: string;
+  isOffSiteFilming: string;
+  isUgc5Photos: string;
+  isExpressDelivery: string;
+  isFilmingEssentials: string;
+  isAdditionalPerson: string;
 };
-
-
-
 
 export type TBrand = {
   userId: Types.ObjectId;
@@ -64,7 +60,7 @@ export type TBrand = {
   characteristicInfo: TCharacteristicInfo;
   addOns: TAddOns;
   status: string;
-  revisionStatus: string;
+  scriptStatus: string;
   paymentStatus: string;
   videoCount: number;
   revisionCount: number;

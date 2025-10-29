@@ -20,6 +20,8 @@ import { notificationService } from '../notification/notification.service';
 import { CLIENT_RENEG_LIMIT } from 'tls';
 import { configDotenv } from 'dotenv';
 import AssignTaskCreator from '../assignTaskCreator/assignTaskCreator.model';
+import { sendEmail } from '../../utils/mailSender';
+import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate } from './hireCreator.utils';
 
 // const createHireCreator = async ( payload: any) => {
 
@@ -699,12 +701,12 @@ const createHireCreator = async (payload: any) => {
         isFilmingEssentials: payload.addOns?.isFilmingEssentials,
         isAdditionalPerson: payload.addOns?.isAdditionalPerson,
       },
-      revisionStatus: 'pending',
+      scriptStatus: 'pending',
     };
 
     console.log('payload.brandInfo?.isScript', payload.brandInfo?.isScript);
-    if (payload.brandInfo?.isScript !== 'no') {
-      hireCreatorData.revisionStatus = 'accepted';
+    if (payload.brandInfo?.isScript) {
+      hireCreatorData.scriptStatus = 'accepted';
     }
 
     console.log('hireCreatorData======================*****', hireCreatorData);
@@ -1296,9 +1298,21 @@ const getAllCreatorByHirecreator = async (
   id: string,
 ) => {
   const HireCreatorQuery = new QueryBuilder(
-    AssignTaskCreator.find({ hireCreatorId: id, hireCreatorUserId: userId }).select(
-      'brandInfo.name brandInfo.email status paymentStatus createdAt creatorId creatorUserId',
-    ),
+    AssignTaskCreator.find({
+      hireCreatorId: id,
+      hireCreatorUserId: userId,
+      status: [
+        'approved_by_admin',
+        'approved',
+        'cancel',
+        'revision',
+        'completed',
+        'delivered',
+      ],
+    })
+      .select('status paymentStatus creatorId creatorUserId hireCreatorId')
+      .populate({ path: 'creatorUserId', select: 'fullName' })
+      .populate({ path: 'creatorId', select: 'profession' }),
     query,
   )
     .search([])
@@ -1316,35 +1330,80 @@ const getAllCreatorByHirecreator = async (
 const getSingleHireCreatorQuery = async (id: string) => {
   const hireCreator: any = await HireCreator.findById(id)
     .populate('userId')
-    .populate('subscriptionId')
+    .populate('subscriptionId');
   if (!hireCreator) {
     throw new AppError(404, 'HireCreator Not Found!!');
   }
   return hireCreator;
 };
 
-const getAllVideosByHirecreator = async (id: string) => {
+const getAllVideosByHirecreator = async (id: string, userId: string) => {
   const hireCreator: any = await HireCreator.findById(id);
-   
+
   if (!hireCreator) {
     throw new AppError(404, 'HireCreator Not Found!!');
   }
 
-  const allVideos=[];
+  const user: any = await User.findById(userId);
 
-  const assignCreators = await AssignTaskCreator.find({
-    hireCreatorId: id,
-  }).select('uploadedFiles');
-
-  for (let i = 0; i < assignCreators.length; i++) {
-    for (let j = 0; j < assignCreators[i].uploadedFiles.length; j++) {
-      allVideos.push(assignCreators[i].uploadedFiles[j]);
-    }
+  if (!user) {
+    throw new AppError(404, 'User Not Found!!');
   }
 
-  console.log('allVideos', allVideos);
+  const allVideos = [];
 
-  return allVideos;
+  if(user.role === 'admin'){
+     const assignCreators = await AssignTaskCreator.find({
+       hireCreatorId: id,
+     }).select('uploadedFiles');
+
+     for (let i = 0; i < assignCreators.length; i++) {
+       for (let j = 0; j < assignCreators[i].uploadedFiles.length; j++) {
+         allVideos.push(assignCreators[i].uploadedFiles[j]);
+       }
+     }
+
+     console.log('allVideos', allVideos);
+
+     return {
+       allVideos,
+       isForward: hireCreator.isForward,
+       revisionCount: hireCreator.revisionCount,
+       status: hireCreator.status,
+     };
+
+  }else{
+
+    if (!hireCreator.isForward) {
+      throw new AppError(404, 'All videos are not forward!!');
+    }
+
+    const assignCreators = await AssignTaskCreator.find({
+      hireCreatorId: id,
+    }).select('uploadedFiles');
+
+    for (let i = 0; i < assignCreators.length; i++) {
+      for (let j = 0; j < assignCreators[i].uploadedFiles.length; j++) {
+        allVideos.push(assignCreators[i].uploadedFiles[j]);
+      }
+    }
+
+    console.log('allVideos', allVideos);
+
+    return {
+      allVideos,
+      isForward: hireCreator.isForward,
+      revisionCount: hireCreator.revisionCount,
+      status: hireCreator.status,
+    };
+    
+  }
+
+  
+
+  
+
+ 
 };
 
 const updateSingleHireCreatorQuery = async (id: string, payload: any) => {
@@ -1484,7 +1543,6 @@ const cancelSingleHireCreator = async (id: String) => {
       userId: hireCreator.userId,
       subscriptionId: hireCreator.subscriptionId,
     }).session(session);
-    
 
     if (!paymentExist) {
       throw new AppError(404, 'Payment not found!!');
@@ -1558,7 +1616,7 @@ const cancelSingleHireCreator = async (id: String) => {
 
         throw new AppError(403, 'HireCreator cancel failed!');
       }
-    }else{
+    } else {
       const refundAmount: any = await paymentService.paymentRefundService(
         Number(paymentExist.amount),
         paymentExist.transactionId,
@@ -1624,7 +1682,6 @@ const cancelSingleHireCreator = async (id: String) => {
 
         throw new AppError(403, 'HireCreator cancel failed!');
       }
-
     }
   } catch (error: any) {
     console.log('errror', error);
@@ -1671,17 +1728,20 @@ const assignAddIsScriptByAdmin = async (
           'You can not add script!! Because script is already added!!',
         );
       }
-      if (hireCreator.revisionStatus === 'script_requiest') {
+      if (hireCreator.scriptStatus === 'script_requiest') {
         throw new AppError(404, 'you already requested script!!');
       }
-      if (hireCreator.revisionStatus === 'accepted') {
+      if (hireCreator.scriptStatus === 'accepted') {
         throw new AppError(404, 'Script is already accepted!!');
+      }
+      if (hireCreator.scriptStatus !== 'pending') {
+        throw new AppError(404, 'Script is not pending!!');
       }
 
       const updateHireCreator = await HireCreator.findByIdAndUpdate(
         id,
         {
-          revisionStatus: 'script_requiest',
+          scriptStatus: 'script_requiest',
           isScript: revisionText,
         },
         { new: true, session },
@@ -1699,26 +1759,39 @@ const assignAddIsScriptByAdmin = async (
         throw new AppError(400, 'Invalid input parameters: status is required');
       }
 
-      if (hireCreator.revisionStatus !== 'script_requiest') {
+      if (hireCreator.scriptStatus !== 'script_requiest') {
         throw new AppError(404, 'you have not requested script!!');
       }
-      if (hireCreator.revisionStatus === 'accepted') {
+      if (hireCreator.scriptStatus === 'accepted') {
         throw new AppError(404, 'Script is already accepted!!');
       }
 
       const statusNew = status === 'accept' ? 'accepted' : 'cancel';
+      let updateHireCreator;
+      if (statusNew === 'accepted') {
+         updateHireCreator = await HireCreator.findByIdAndUpdate(
+          id,
+          {
+            scriptStatus: 'accepted',
+          },
+          { new: true, session },
+        );
 
-      const updateHireCreator = await HireCreator.findByIdAndUpdate(
-        id,
-        {
-          revisionStatus: statusNew,
-        },
-        { new: true, session },
-      );
+        if (!updateHireCreator) {
+          throw new AppError(403, 'HireCreator update failed!!');
+        }
 
-      if (!updateHireCreator) {
-        throw new AppError(403, 'HireCreator update failed!!');
+      }else{
+         updateHireCreator = await HireCreator.findByIdAndUpdate(
+          id,
+          {
+            scriptStatus: 'pending',
+          },
+          { new: true, session },
+        );
       }
+
+      
       await session.commitTransaction();
       session.endSession();
 
@@ -1736,7 +1809,6 @@ const assignAddIsScriptByAdmin = async (
     );
   }
 };
-
 
 const assignTaskCreatorUploadVideosByCreator = async (
   id: string,
@@ -1904,7 +1976,7 @@ const assignTaskRevisionByUser = async (
     if (!payload.status) {
       throw new AppError(
         400,
-        'Invalid input parameters: revisionText or status is required',
+        'Invalid input parameters: status is required',
       );
     }
 
@@ -1951,15 +2023,15 @@ const assignTaskRevisionByUser = async (
         throw new AppError(403, 'HireCreator update failed!!');
       }
 
-      const assignCreator = await AssignTaskCreator.updateMany(
-        { hireCreatorId: id },
-        { status: 'revision' },
-        { new: true, session },
-      );
-      if (!assignCreator) {
-        throw new AppError(403, 'assignCreator update failed!!');
-      }
-      console.log('updateHireCreator', updateHireCreator);
+      // const assignCreator = await AssignTaskCreator.updateMany(
+      //   { hireCreatorId: id },
+      //   { status: 'revision' },
+      //   { new: true, session },
+      // );
+      // if (!assignCreator) {
+      //   throw new AppError(403, 'assignCreator update failed!!');
+      // }
+      // console.log('updateHireCreator', updateHireCreator);
 
       await session.commitTransaction();
       session.endSession();
@@ -1991,7 +2063,7 @@ const assignTaskRevisionByUser = async (
       );
 
       const updateAssignCreator: any = await AssignTaskCreator.updateMany(
-        { hireCreatorId: id },
+        { hireCreatorId: id, status: 'completed' },
         { status: 'delivered' },
         { new: true, session },
       );
@@ -2008,6 +2080,62 @@ const assignTaskRevisionByUser = async (
       if (!updateHireCreator) {
         throw new AppError(403, 'Hire Creator update failed!!');
       }
+
+      // i want to send mail all creators
+      // await sendEmail()
+
+      const deliveryAssignCreator = await AssignTaskCreator.find({
+        hireCreatorId: id,
+        status: 'delivered',
+      })
+        .select('creatorUserId')
+        .populate({ path: 'creatorUserId', select: 'fullName email' })
+        .session(session);
+
+      console.log('deliveryAssignCreator', deliveryAssignCreator);
+
+      if (!deliveryAssignCreator || deliveryAssignCreator.length === 0) {
+        throw new AppError(
+          403,
+          'No creators found for delivery notification!!',
+        );
+      }
+
+      // Send emails to all creators
+      const emailPromises = deliveryAssignCreator.map(async (creator: any) => {
+        try {
+          await sendEmail(
+            creator.creatorUserId.email,
+            'Task Successfully Delivered! 🎉',
+            getDeliveryEmailTemplate(creator.creatorUserId.fullName),
+          );
+        } catch (error) {
+          console.error(
+            `Failed to send email to ${creator.creatorUserId.email}:`,
+            error,
+          );
+        }
+      });
+
+      // Send admin notification email
+      try {
+        const adminEmail = 'delwarbscse@gmail.com';
+        await sendEmail(
+          adminEmail,
+          `Project Delivery Report - ${updateHireCreator._id}`,
+          getAdminNotificationEmailTemplate(
+            deliveryAssignCreator,
+            updateHireCreator,
+          ),
+        );
+        console.log('Admin notification email sent successfully');
+      } catch (error) {
+        console.error('Failed to send admin notification email:', error);
+      }
+
+      // Wait for all emails to be sent
+      await Promise.all(emailPromises);
+
       await session.commitTransaction();
       session.endSession();
 
@@ -2026,18 +2154,26 @@ const assignTaskRevisionByUser = async (
   }
 };
 
-
-const videoForwardByAdmin = async (
-  id: string,
-) => {
-
+const videoForwardByAdmin = async (id: string, userId: string) => {
   const hireCreator: any = await HireCreator.findById(id);
   if (!hireCreator) {
     throw new AppError(404, 'Hire Creator is not found!!');
   }
 
-  if (hireCreator.status !== 'ongoing') {
+  if (hireCreator.status !== 'ongoing' && hireCreator.status !== 'revision') {
     throw new AppError(404, 'HireCreator is not ongoing!!');
+  }
+
+  const videoCountAndTakeVideoCount = hireCreator.videoCount;
+
+  const data = await hireCreatorService.getAllVideosByHirecreator(
+    hireCreator._id.toString(),
+    userId,
+  );
+
+  const allVideos = data.allVideos;
+  if (allVideos.length !== videoCountAndTakeVideoCount) {
+    throw new AppError(403, 'All videos are not uploaded!!');
   }
 
   const updateHireCreator: any = await HireCreator.findByIdAndUpdate(
@@ -2051,10 +2187,7 @@ const videoForwardByAdmin = async (
   }
 
   return updateHireCreator;
-
 };
-
-
 
 const assignTaskCreatorReSubmitUploadVideosByCreator = async (
   id: string,

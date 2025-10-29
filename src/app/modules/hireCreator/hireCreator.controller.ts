@@ -96,8 +96,9 @@ const getAllCreatorByHirecreator = catchAsync(async (req, res) => {
 
 const getAllVideosByHirecreator = catchAsync(async (req, res) => {
   const id = req.params.id;
+  const { userId } = req.user;
   const result  = await hireCreatorService.getAllVideosByHirecreator(
-    id,
+    id,userId
   );
 
   sendResponse(res, {
@@ -237,11 +238,10 @@ const assignTaskRevisionByUser = catchAsync(async (req, res) => {
 
 const videoForwardByAdmin = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { userId } = req.user;
   
 
-  const result = await hireCreatorService.videoForwardByAdmin(
-    id,
-  );
+  const result = await hireCreatorService.videoForwardByAdmin(id, userId);
 
   sendResponse(res, {
     success: true,

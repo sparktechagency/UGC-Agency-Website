@@ -48,6 +48,7 @@ const getAllAssignTaskCreator = catchAsync(async (req, res) => {
 
 const getAssignTaskCreatorByCreatorOrUser = catchAsync(async (req, res) => {
     const { userId } = req.user;
+    console.log('userId*****', userId);
   const { meta, result } =
     await assignTaskCreatorService.getAllAssignTaskCreatorOfUserQuery(
       req.query,
@@ -80,6 +81,18 @@ const getAssignTaskCreatorByUser = catchAsync(async (req, res) => {
 
 const getSingleAssignTaskCreator = catchAsync(async (req, res) => {
   const result = await assignTaskCreatorService.getSingleAssignTaskCreatorQuery(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single AssignTaskCreator are requered successful!!',
+  });
+});
+const getSingleAssignTaskCreatorVideo = catchAsync(async (req, res) => {
+  const result = await assignTaskCreatorService.getSingleAssignTaskCreatorVideo(
+    req.params.id,
+  );
 
   sendResponse(res, {
     success: true,
@@ -262,6 +275,23 @@ const assignTaskCreatorReSubmitUploadVideosByCreator = catchAsync(
     });
   },
 );
+
+
+const creatorPaymentByAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+
+  const result = await assignTaskCreatorService.creatorPaymentByAdmin(id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single AssignTaskCreator  are payment successful!!',
+  });
+});
+
+
 const deleteSingleHireCreatorVideoDelete = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
@@ -302,6 +332,7 @@ export const assignTaskCreatorController = {
   getAssignTaskCreatorByCreatorOrUser,
   getAssignTaskCreatorByUser,
   getSingleAssignTaskCreator,
+  getSingleAssignTaskCreatorVideo,
   getSingleHireCreatorToAssignTaskCreator,
   singleAssignTaskCreatorApprovedCancel,
   multipleAssignTaskCreatorApprovedByAdmin,
@@ -310,6 +341,7 @@ export const assignTaskCreatorController = {
   // assignTaskCreatorReSubmitUploadVideosByCreator,
   assignTaskCreatorUploadVideosByCreator,
   assignTaskCreatorReSubmitUploadVideosByCreator,
+  creatorPaymentByAdmin,
   deleteSingleHireCreatorVideoDelete,
 
   deleteSingleAssignTaskCreator,

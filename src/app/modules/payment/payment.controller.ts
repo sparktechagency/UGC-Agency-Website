@@ -365,7 +365,7 @@ const successPage = async (req: Request, res: Response) => {
           captureResponse.result.purchase_units[0].payments.captures[0].amount
             .value,
         ),
-        videoCount: subscriptioinExist.videoCount
+        videoCount: subscriptioinExist.videoCount,
       },
       { new: true, session },
     );

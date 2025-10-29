@@ -1,4 +1,3 @@
-
 import mongoose, { Schema } from 'mongoose';
 
 const BrandInfoSchema = new Schema({
@@ -87,7 +86,7 @@ const hireCreatorSchema = new Schema(
       ],
       default: 'draft',
     },
-    revisionStatus: {
+    scriptStatus: {
       type: String,
       required: true,
       enum: ['pending', 'script_requiest', 'cancel', 'accepted'],
@@ -132,4 +131,3 @@ const hireCreatorSchema = new Schema(
 const HireCreator = mongoose.model('HireCreator', hireCreatorSchema);
 
 export default HireCreator;
-
