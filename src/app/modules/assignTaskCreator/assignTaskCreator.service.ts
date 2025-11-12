@@ -67,6 +67,7 @@ const createAssignTaskCreator = async (payload: any) => {
           hireCreatorId: existHireCreator._id,
           hireCreatorUserId: existHireCreator.userId,
           videoCount: existHireCreator.videoCount,
+          isScript: existHireCreator.isScript,
         };
       }
 
@@ -1252,7 +1253,6 @@ const creatorPaymentByAdmin = async (
   }
   return paymentAssignCreator;
 
-  
 };
 
 const deleteSingleHireCreatorVideoDeleteByCreator = async (

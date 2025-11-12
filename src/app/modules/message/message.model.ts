@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const { Schema, model, models } = mongoose;
+const { Schema, model } = mongoose;
 
 const messageSchema = new Schema(
   {

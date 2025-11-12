@@ -98,8 +98,8 @@ const getAllBlogQuery = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 
-const getSingleBlogQuery = async (id: string) => {
-  const blog: any = await Blog.findById(id);
+const getSingleBlogQuery = async (title: string) => {
+  const blog: any = await Blog.findOne({title});
   if (!blog) {
     throw new AppError(404, 'Blog Not Found!!');
   }
