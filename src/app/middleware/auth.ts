@@ -24,7 +24,7 @@ const auth = (...userRoles: string[]) => {
 
     // console.log('decodeData', decodeData);
     const { role, userId, email } = decodeData;
-    console.log('decodeData', decodeData);
+    // console.log('decodeData', decodeData);
     const isUserExist = await User.IsUserExistById(userId);
 
     if (!isUserExist) {
@@ -39,7 +39,7 @@ const auth = (...userRoles: string[]) => {
     }
 
     if (userRoles && !userRoles.includes(role)) {
-      console.log('userRoles', userRoles);
+      // console.log('userRoles', userRoles);
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
     }
     req.user = decodeData;
