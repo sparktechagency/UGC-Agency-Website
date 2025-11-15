@@ -26,6 +26,7 @@ blogRouter
     blogController.getAllBlog,
   )
   .get('/:id', blogController.getSingleBlog)
+  .get('/admin/:id', blogController.getSingleBlogByAdmin)
   .patch(
     '/:id',
      auth(USER_ROLE.ADMIN),

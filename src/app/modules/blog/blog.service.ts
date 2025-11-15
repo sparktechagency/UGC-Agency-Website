@@ -105,6 +105,13 @@ const getSingleBlogQuery = async (title: string) => {
   }
   return blog;
 };
+const getSingleBlogByAdmin = async (id: string) => {
+  const blog: any = await Blog.findById(id);
+  if (!blog) {
+    throw new AppError(404, 'Blog Not Found!!');
+  }
+  return blog;
+};
 
 const updateSingleBlogQuery = async (id: string, files: any, payload: any) => {
   try {
@@ -205,6 +212,7 @@ export const blogService = {
   createBlog,
   getAllBlogQuery,
   getSingleBlogQuery,
+  getSingleBlogByAdmin,
   updateSingleBlogQuery,
   deletedBlogQuery,
 };

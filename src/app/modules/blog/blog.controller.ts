@@ -45,6 +45,16 @@ const getSingleBlog = catchAsync(async (req, res) => {
     message: 'Single Blog are requered successful!!',
   });
 });
+const getSingleBlogByAdmin = catchAsync(async (req, res) => {
+  const result = await blogService.getSingleBlogByAdmin(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: result,
+    message: 'Single Blog are requered successful!!',
+  });
+});
 
 const updateSingleBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -79,6 +89,7 @@ export const blogController = {
   createBlog,
   getAllBlog,
   getSingleBlog,
+  getSingleBlogByAdmin,
   updateSingleBlog,
   deleteSingleBlog,
 };
