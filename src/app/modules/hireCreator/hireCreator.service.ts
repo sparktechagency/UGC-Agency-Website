@@ -21,7 +21,7 @@ import { CLIENT_RENEG_LIMIT } from 'tls';
 import { configDotenv } from 'dotenv';
 import AssignTaskCreator from '../assignTaskCreator/assignTaskCreator.model';
 import { sendEmail } from '../../utils/mailSender';
-import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate } from './hireCreator.utils';
+import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate, getScriptAcceptOrCancelFromHireCreatorEmailTemplate, getScriptAcceptOrCancelRequestEmailTemplate } from './hireCreator.utils';
 
 // const createHireCreator = async ( payload: any) => {
 
@@ -1714,6 +1714,14 @@ const assignAddIsScriptByAdmin = async (
       throw new AppError(404, 'Hire Creator is not found!!');
     }
 
+    const hireCreatoruser = await User.findById(hireCreator.userId).session(
+      session,
+    )
+
+    if (!hireCreatoruser) {
+      throw new AppError(404, 'HireCreator user is not found!!');
+    }
+
     if (user.role === 'admin') {
       if (!revisionText) {
         throw new AppError(
@@ -1750,6 +1758,16 @@ const assignAddIsScriptByAdmin = async (
       if (!updateHireCreator) {
         throw new AppError(403, 'HireCreator update failed!!');
       }
+
+      await sendEmail(
+        hireCreatoruser.email,
+        'Script Accept or Cancel Request from Admin! 🎉',
+        getScriptAcceptOrCancelRequestEmailTemplate(hireCreatoruser.fullName),
+      );
+
+
+
+
       await session.commitTransaction();
       session.endSession();
 
@@ -1790,6 +1808,22 @@ const assignAddIsScriptByAdmin = async (
           { new: true, session },
         );
       }
+
+      const admin = await User.findOne({ role: 'admin' }).session(session);
+      if (!admin) {
+        throw new AppError(404, 'Admin not found!');
+      }
+
+      const acceptOrCancel = {
+        hireCreatorName: hireCreatoruser.fullName,
+        status: statusNew,
+      };
+
+      await sendEmail(
+        admin.email,
+        `Script ${statusNew} from HireCreator! 🎉`,
+        getScriptAcceptOrCancelFromHireCreatorEmailTemplate(acceptOrCancel),
+      );
 
       
       await session.commitTransaction();
@@ -2022,6 +2056,30 @@ const assignTaskRevisionByUser = async (
       if (!updateHireCreator) {
         throw new AppError(403, 'HireCreator update failed!!');
       }
+
+      const admin = await User.findOne({ role: 'admin' }).session(session);
+      if (!admin) {
+        throw new AppError(404, 'Admin not found!');
+      }
+
+      const brandCreator = await User.findById(userId).session(session);
+      if (!brandCreator) {
+        throw new AppError(404, 'BrandCreator not found!');
+      }
+      console.log('BrandCreator', brandCreator);
+
+      const revisionData:any = {
+        hireCreatorId: updateHireCreator._id,
+        brandCreatorName: brandCreator.fullName,
+        brandCreatorEmail: brandCreator.fullName
+      };
+      
+
+      await sendEmail(
+        admin.email,
+        'Revision Request from Hire Creator 🎉',
+        getDeliveryEmailTemplate(revisionData),
+      );
 
       // const assignCreator = await AssignTaskCreator.updateMany(
       //   { hireCreatorId: id },

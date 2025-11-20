@@ -132,3 +132,99 @@ export const getAdminNotificationEmailTemplate = (
     </div>
   `;
 };
+
+
+
+export const getRevisionEmailTemplate = (payload: any) => {
+  const { hireCreatorId, brandCreatorName, brandCreatorEmail } = payload;
+
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; color: #333;">
+      <tr>
+        <td style="padding: 20px;">
+
+          <h2 style="margin-bottom: 16px;">Revision Request Received</h2>
+
+          <p>Hello Admin,</p>
+
+          <p>A creator has requested a revision on one of their projects. Details are below:</p>
+
+          <table style="margin: 20px 0; padding: 15px; background: #f7f7f7; border-radius: 6px;">
+            <tr><td><strong>Hire Creator ID:</strong> ${hireCreatorId}</td></tr>
+            <tr><td><strong>Brand Creator Name:</strong> ${brandCreatorName}</td></tr>
+            <tr><td><strong>Brand Creator Email:</strong> ${brandCreatorEmail}</td></tr>
+          </table>
+
+          <p>Please check the dashboard to review and respond.</p>
+
+          <p style="margin-top: 25px;">
+            Regards,<br/>
+            Lunq Team
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+
+
+export const getScriptAcceptOrCancelRequestEmailTemplate = (
+  hireCreatorName: string,
+) => {
+  return `
+    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+      <h2 style="margin-bottom: 12px;">New Script Added For Your Review</h2>
+
+      <p>Hello ${hireCreatorName},</p>
+
+      <p>
+        An admin has added a new script for your project because no script was submitted from your side.
+      </p>
+
+      <p>
+        Please review the script and choose whether you want to <strong>accept</strong> it or <strong>cancel</strong>.
+      </p>
+
+      <p>
+        You can check the full script and respond directly from your website.
+      </p>
+
+      <p style="margin-top: 30px;">Best regards,<br/>Lunq Team</p>
+    </div>
+  `;
+};
+
+
+export const getScriptAcceptOrCancelFromHireCreatorEmailTemplate = (
+  payload: any
+) => {
+  const { hireCreatorName, status } = payload;
+
+  const statusExplanation =
+    status === 'accepted'
+      ? 'The hire creator reviewed the script added by the admin and approved it.'
+      : 'The hire creator reviewed the script added by the admin and rejected it.';
+
+    return `
+    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+      <h2 style="margin-bottom: 12px;">Script Response From Hire Creator</h2>
+
+      <p>Hello Admin,</p>
+
+      <p>
+        <strong>${hireCreatorName}</strong> has <strong>${statusExplanation}</strong>.
+      </p>
+
+      <p>
+        Please check the dashboard for more details and next steps.
+      </p>
+
+      <p style="margin-top: 30px;">Best regards,<br/>Lunq System</p>
+    </div>
+  `;
+  
+};
+
+
+
