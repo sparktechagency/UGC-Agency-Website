@@ -31,6 +31,7 @@ paymentRouter
   .get('/stripe-success', paymentController.successStripePage)
   .get('/stripe-cancel', paymentController.cancelStripetPage)
   .get('/success', paymentController.successPage)
+  .get('/success-sssssss', paymentController.successssssssssPage)
   .get('/cancel', paymentController.cancelPaymentPage)
   .get('/success-page', paymentController.successPageDirect)
   .get('/cancel-page', paymentController.cancelPaymentPageDirect)

@@ -23,6 +23,10 @@ const blogSchema = new Schema<TBlog>(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+      required: true,
+    },
     details: {
       type: String,
       required: true,
@@ -31,7 +35,6 @@ const blogSchema = new Schema<TBlog>(
       type: String,
       required: true,
     },
-    
   },
   { timestamps: true },
 );

@@ -6,6 +6,7 @@ import { access, unlink } from 'fs/promises';
 import Blog from './blog.model';
 import { deleteFromS3, deleteManyFromS3, uploadManyToS3, uploadToS3 } from '../../utils/s3';
 import { TBlog } from './blog.interface';
+import slugify from 'slugify';
 
 const createBlog = async (files: any, payload: TBlog) => {
   try {
@@ -18,6 +19,10 @@ const createBlog = async (files: any, payload: TBlog) => {
         folder: 'blogs/',
       });
       payload.image = image;
+    }
+
+    if(payload.title){
+      payload.slug = slugify(payload.title.trim(), '_');
     }
     // if (files.bodyImage && files.bodyImage.length > 0) {
     //   const image: any = await uploadToS3({
@@ -98,8 +103,8 @@ const getAllBlogQuery = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 
-const getSingleBlogQuery = async (title: string) => {
-  const blog: any = await Blog.findOne({title});
+const getSingleBlogQuery = async (slug: string) => {
+  const blog: any = await Blog.findOne({ slug });
   if (!blog) {
     throw new AppError(404, 'Blog Not Found!!');
   }
@@ -132,6 +137,10 @@ const updateSingleBlogQuery = async (id: string, files: any, payload: any) => {
       });
       payload.image = image;
 
+      if (payload.title) {
+        payload.slug = slugify(payload.title.trim(), '_');
+      }
+
       const result = await Blog.findByIdAndUpdate(id, payload, {
         new: true,
       });
@@ -152,6 +161,9 @@ const updateSingleBlogQuery = async (id: string, files: any, payload: any) => {
 
 
     }else{
+      if (payload.title) {
+        payload.slug = slugify(payload.title.trim(), '_');
+      }
 
       const result = await Blog.findByIdAndUpdate(id, payload, {
         new: true,

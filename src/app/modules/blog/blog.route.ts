@@ -11,7 +11,7 @@ const upload = fileUpload('./public/uploads/blog');
 blogRouter
   .post(
     '/create-blog',
-     auth(USER_ROLE.ADMIN),
+    //  auth(USER_ROLE.ADMIN),
     upload.fields([
       { name: 'image', maxCount: 1 },
       // { name: 'bodyImage', maxCount: 1 },

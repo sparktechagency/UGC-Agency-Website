@@ -309,12 +309,269 @@ const getAllIncomeRasioBydays = catchAsync(async (req, res) => {
 //payment
 
 const successStripePage = async (req: Request, res: Response) => {
+  const subscriptioinId = req.query.subscriptioinId;
+
+  const paymentDetails = await Payment.findOne({
+    subscriptionId: subscriptioinId,
+  });
+
+  if (!paymentDetails) {
+    throw new AppError(404, 'Payment details not found!');
+  }
+
+  const payload = {
+    amount: paymentDetails?.amount,
+    method: paymentDetails?.method,
+    date: paymentDetails?.transactionDate,
+  };
+
+   const formattedDate = payload.date.toLocaleString('en-US', {
+     weekday: 'short', // Tue
+     year: 'numeric', // 2025
+     month: 'short', // Nov
+     day: '2-digit', // 25
+     hour: '2-digit', // 05
+     minute: '2-digit', // 07
+     second: '2-digit', // 33
+     hour12: true, // 12-hour format
+   });
+
+   const successTemplete = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f7f8fa;
+      }
+
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 400px;
+        width: 90%;
+      }
+
+      .success-icon {
+        font-size: 4rem;
+        color: #4caf50;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        color: #111827;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .details {
+        text-align: left;
+        margin-bottom: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 0;
+        font-size: 0.95rem;
+      }
+
+      .details div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+
+      .btn-home {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        color: #fff;
+        background-color: #111827;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✔️</div>
+      <h1>Payment Successful</h1>
+      <p>Thank you for your payment. Your order is being processed.</p>
+
+      <div class="details">
+        <div>
+          <span>Amount Paid:</span>
+          <span>$${payload.amount}</span>
+        </div>
+        <div>
+          <span>Payment Method:</span>
+          <span>${payload.method}</span>
+        </div>
+        <div>
+          <span>Date & Time:</span>
+          <span>${formattedDate}</span>
+        </div>
+      </div>
+
+      <a href="https://thesocialchance.com/profile?step=order" class="btn-home">View Order History</a>
+    </div>
+  </body>
+</html>
+`;
+
   res.send(successTemplete);
 };
 
 
 const cancelStripetPage = async (req: Request, res: Response) => {
   res.send(cancelTemplete);
+};
+
+const successssssssssPage = async (req: Request, res: Response) => {
+
+  const payload = {
+    amount: 100,
+    method: 'Stripe',
+    date: new Date(),
+
+  }
+
+  const formattedDate = payload.date.toLocaleString('en-US', {
+    weekday: 'short', // Tue
+    year: 'numeric', // 2025
+    month: 'short', // Nov
+    day: '2-digit', // 25
+    hour: '2-digit', // 05
+    minute: '2-digit', // 07
+    second: '2-digit', // 33
+    hour12: true, // 12-hour format
+  });
+
+  const successTemplete = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f7f8fa;
+      }
+
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 400px;
+        width: 90%;
+      }
+
+      .success-icon {
+        font-size: 4rem;
+        color: #4caf50;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        color: #111827;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .details {
+        text-align: left;
+        margin-bottom: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 0;
+        font-size: 0.95rem;
+      }
+
+      .details div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+
+      .btn-home {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        color: #fff;
+        background-color: #111827;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✔️</div>
+      <h1>Payment Successful</h1>
+      <p>Thank you for your payment. Your order is being processed.</p>
+
+      <div class="details">
+        <div>
+          <span>Amount Paid:</span>
+          <span>$${payload.amount}</span>
+        </div>
+        <div>
+          <span>Payment Method:</span>
+          <span>${payload.method}</span>
+        </div>
+        <div>
+          <span>Date & Time:</span>
+          <span>${formattedDate}</span>
+        </div>
+      </div>
+
+      <a href="https://thesocialchance.com/profile?step=order" class="btn-home">View Order History</a>
+    </div>
+  </body>
+</html>
+`;
+  res.send(successTemplete);
 };
 
 
@@ -431,7 +688,129 @@ const successPage = async (req: Request, res: Response) => {
     await notificationService.createNotification(notificationData, session);
 
     await session.commitTransaction();
-    res.send(successTemplete);
+
+     const payload = {
+       amount: payment[0]?.amount,
+       method: payment[0]?.method,
+       date: payment[0]?.transactionDate,
+     };
+
+     const formattedDate = payload.date.toLocaleString('en-US', {
+       weekday: 'short', // Tue
+       year: 'numeric', // 2025
+       month: 'short', // Nov
+       day: '2-digit', // 25
+       hour: '2-digit', // 05
+       minute: '2-digit', // 07
+       second: '2-digit', // 33
+       hour12: true, // 12-hour format
+     });
+
+     const successTemplete = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f7f8fa;
+      }
+
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-width: 400px;
+        width: 90%;
+      }
+
+      .success-icon {
+        font-size: 4rem;
+        color: #4caf50;
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        color: #111827;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .details {
+        text-align: left;
+        margin-bottom: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 0;
+        font-size: 0.95rem;
+      }
+
+      .details div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+
+      .btn-home {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        color: #fff;
+        background-color: #111827;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✔️</div>
+      <h1>Payment Successful</h1>
+      <p>Thank you for your payment. Your order is being processed.</p>
+
+      <div class="details">
+        <div>
+          <span>Amount Paid:</span>
+          <span>$${payload.amount}</span>
+        </div>
+        <div>
+          <span>Payment Method:</span>
+          <span>${payload.method}</span>
+        </div>
+        <div>
+          <span>Date & Time:</span>
+          <span>${formattedDate}</span>
+        </div>
+      </div>
+
+      <a href="https://thesocialchance.com/profile?step=order" class="btn-home">View Order History</a>
+    </div>
+  </body>
+</html>
+`;
+
+     res.send(successTemplete);
 
   } catch (error) {
     await session.abortTransaction();
@@ -943,6 +1322,7 @@ export const paymentController = {
   successStripePage,
   cancelStripetPage,
   successPage,
+  successssssssssPage,
   cancelPaymentPage,
   successPageDirect,
   cancelPaymentPageDirect,

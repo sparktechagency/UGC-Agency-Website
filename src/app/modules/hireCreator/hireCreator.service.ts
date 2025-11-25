@@ -776,6 +776,7 @@ const createHireCreator = async (payload: any) => {
       paymentUrl = await paymentService.createCheckout(
         payload.userId,
         paymentData,
+        session,
       );
     }
 

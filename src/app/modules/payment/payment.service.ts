@@ -179,10 +179,10 @@ const createPaypalPaymentService = async (payload: any) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
-        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
-        // return_url: `http://10.10.7.65:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        // cancel_url: `http://10.10.7.65:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        return_url: `http://10.10.7.65:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        cancel_url: `http://10.10.7.65:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
@@ -984,9 +984,22 @@ const getBrandEngagement = async (days:string) => {
 
 
 
-const createCheckout = async (userId: any, payload: any) => {
+const createCheckout = async (userId: any, payload: any, session?: any) => {
   console.log('stripe payment', payload);
-  let session = {} as { id: string };
+  let stripe_session = {} as { id: string };
+
+  const order = await HireCreator.findById(payload.orderId).session(session);
+  console.log('order==', order);
+
+  if (!order) {
+    throw new AppError(404, 'Order not found!');
+  }
+
+  const subscriptioin = await Subscription.findById(order.subscriptionId).session(session);
+
+  if (!subscriptioin) {
+    throw new AppError(404, 'Subscriptioin not found!');
+  }
 
 
 
@@ -1008,10 +1021,10 @@ const createCheckout = async (userId: any, payload: any) => {
   const sessionData: any = {
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `https://api.thesocialchance.com/api/v1/payment/stripe-success`,
-    cancel_url: `https://api.thesocialchance.com/api/v1/payment/stripe-cancel`,
-    // success_url: `http://10.10.7.65:5002/api/v1/payment/stripe-success`,
-    // cancel_url: `http://10.10.7.65:5002/api/v1/payment/stripe-cancel`,
+    // success_url: `https://api.thesocialchance.com/api/v1/payment/stripe-success`,
+    // cancel_url: `https://api.thesocialchance.com/api/v1/payment/stripe-cancel`,
+    success_url: `http://10.10.7.65:5002/api/v1/payment/stripe-success?subscriptioinId=${subscriptioin._id}`,
+    cancel_url: `http://10.10.7.65:5002/api/v1/payment/stripe-cancel`,
     line_items: lineItems,
     metadata: {
       userId: String(userId),
@@ -1023,7 +1036,7 @@ const createCheckout = async (userId: any, payload: any) => {
 
   try {
     console.log('try session');
-    session = await stripe.checkout.sessions.create(sessionData);
+    stripe_session = await stripe.checkout.sessions.create(sessionData);
     console.log('session==', session);
 
   } catch (error) {
@@ -1031,7 +1044,7 @@ const createCheckout = async (userId: any, payload: any) => {
   }
 
   console.log('try session 22');
-  const { id: session_id, url }: any = session || {};
+  const { id: session_id, url }: any = stripe_session || {};
 
   console.log({ url });
 
