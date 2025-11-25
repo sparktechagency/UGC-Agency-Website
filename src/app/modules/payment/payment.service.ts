@@ -179,10 +179,10 @@ const createPaypalPaymentService = async (payload: any) => {
         user_action: 'PAY_NOW',
         // return_url: `${config.paypal.payment_capture_url}`,
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
-        // return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
-        // cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
-        return_url: `http://10.10.7.65:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        cancel_url: `http://10.10.7.65:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
+        cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `http://10.10.7.65:5002/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `http://10.10.7.65:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
@@ -1021,10 +1021,10 @@ const createCheckout = async (userId: any, payload: any, session?: any) => {
   const sessionData: any = {
     payment_method_types: ['card'],
     mode: 'payment',
-    // success_url: `https://api.thesocialchance.com/api/v1/payment/stripe-success`,
-    // cancel_url: `https://api.thesocialchance.com/api/v1/payment/stripe-cancel`,
-    success_url: `http://10.10.7.65:5002/api/v1/payment/stripe-success?subscriptioinId=${subscriptioin._id}`,
-    cancel_url: `http://10.10.7.65:5002/api/v1/payment/stripe-cancel`,
+    success_url: `https://api.thesocialchance.com/api/v1/payment/stripe-success?subscriptioinId=${subscriptioin._id}`,
+    cancel_url: `https://api.thesocialchance.com/api/v1/payment/stripe-cancel`,
+    // success_url: `http://10.10.7.65:5002/api/v1/payment/stripe-success?subscriptioinId=${subscriptioin._id}`,
+    // cancel_url: `http://10.10.7.65:5002/api/v1/payment/stripe-cancel`,
     line_items: lineItems,
     metadata: {
       userId: String(userId),
