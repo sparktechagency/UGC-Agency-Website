@@ -19,6 +19,10 @@ userRoutes
     userController.createUser,
   )
   .post(
+    '/email',
+    userController.email,
+  )
+  .post(
     '/create-user-verify-otp',
     validateRequest(resentOtpValidations.verifyOtpZodSchema),
     userController.userCreateVarification,

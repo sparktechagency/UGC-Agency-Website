@@ -16,6 +16,8 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import Otp from '../otp/otp.model';
 import { imageUrlGenarate } from '../../utils/imageUrl';
+import { sendEmail } from '../../utils/mailSender';
+import { getDeliveryEmailTemplate } from '../hireCreator/hireCreator.utils';
 
 export type IFilter = {
   searchTerm?: string;
@@ -28,11 +30,170 @@ export interface OTPVerifyAndCreateUserProps {
   token: string;
 }
 
+const email = async () => {
+  await sendEmail(
+    'dev.humayonforid44@gmail.com',
+    'Task Successfully Delivered! 🎉',
+    //  getDeliveryEmailTemplate('Humayon Forid'),
+
+    `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
+
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          DELIVERY<br>ACCEPTED!
+        </h1>
+      </td>
+      <td align="right">
+        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello Rama,
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      Great news! Your delivery for Project ID: cbjscslkcmsömc has been officially accepted by the client.
+    </p>
+    <p style="margin-bottom:15px;">
+      Thank you for your hard work, professionalism, and creativity. The client is very happy with the results.
+    </p>
+    <p style="margin-bottom:15px;">
+      We will contact you shortly to request your bank details so we can process your payment.
+    </p>
+    <p style="margin-bottom:15px;">
+      If you have any questions, feel free to reach out.
+    </p>
+    <p style="margin-bottom:15px;">
+      Keep up the amazing work!
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
+        </div>
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`,
+  );
+};
+
 const createUserToken = async (payload: TUserCreate) => {
-  const { role, email, fullName, password, } = payload;
+  const { role, email, fullName, password } = payload;
 
   // user role check
-  if (!(role === USER_ROLE.USER )) {
+  if (!(role === USER_ROLE.USER)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User data is not valid !!');
   }
 
@@ -96,7 +257,7 @@ const createUserToken = async (payload: TUserCreate) => {
     // // console.log({alala})
   });
 
-console.log('payload====', payload);
+  console.log('payload====', payload);
 
   // crete token
   const createUserToken = createToken({
@@ -116,7 +277,7 @@ const otpVerifyAndCreateUser = async ({
   if (!token) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Token not found');
   }
-console.log('token', token)
+  console.log('token', token);
   const decodeData = verifyToken({
     token,
     access_secret: config.jwt_access_secret as string,
@@ -141,11 +302,9 @@ console.log('token', token)
     });
   });
 
-  if (!(role === USER_ROLE.USER  || role === USER_ROLE.CREATOR)) {
+  if (!(role === USER_ROLE.USER || role === USER_ROLE.CREATOR)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User data is not valid !!');
   }
-
- 
 
   const isExist = await User.isUserExist(email as string);
 
@@ -156,21 +315,19 @@ console.log('token', token)
     );
   }
 
- const userData = {
-   password,
-   email,
-   fullName,
-   role,
-   profile
- };
+  const userData = {
+    password,
+    email,
+    fullName,
+    role,
+    profile,
+  };
 
   const user = await User.create(userData);
 
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User creation failed');
   }
-
-
 
   // const jwtPayload: {
   //   userId: string;
@@ -193,11 +350,8 @@ console.log('token', token)
   return user;
 };
 
-const creatorUserService = async (
-  payload:any
-) => {
-
-const { role, email, fullName, password, ...rest } = payload;
+const creatorUserService = async (payload: any) => {
+  const { role, email, fullName, password, ...rest } = payload;
 
   if (!(payload.role === USER_ROLE.CREATOR)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User data is not valid !!');
@@ -216,7 +370,7 @@ const { role, email, fullName, password, ...rest } = payload;
     password: payload.password,
     email: payload.email,
     fullName: payload.fullName,
-    role: 'creator'
+    role: 'creator',
   };
   console.log('userData', userData);
 
@@ -225,8 +379,6 @@ const { role, email, fullName, password, ...rest } = payload;
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User creation failed');
   }
-
-  
 
   // const jwtPayload: {
   //   userId: string;
@@ -279,10 +431,6 @@ const switchRoleUser = async (id: string) => {
   return user;
 };
 
-
-
-
-
 // const userSwichRoleService = async (id: string) => {
 //   const swichUser = await User.findById(id);
 //   // console.log('swichUser', swichUser);
@@ -293,11 +441,10 @@ const switchRoleUser = async (id: string) => {
 //   // console.log('as role', swichUser.asRole)
 //    let swichRole;
 //   if (swichUser.role == 'business') {
- 
+
 //       swichRole = 'customer';
-    
+
 //     }else{
-      
 
 //       swichRole = 'business';
 //     }
@@ -402,7 +549,6 @@ const getAllUserQuery = async (query: Record<string, unknown>) => {
 };
 
 const getAllUserCount = async () => {
-  
   const allBusinessCount = await User.countDocuments({
     role: USER_ROLE.USER,
   });
@@ -510,7 +656,6 @@ const deleteMyAccount = async (id: string, payload: DeleteAccountPayload) => {
   return userDeleted;
 };
 
-
 const blockedUser = async (id: string, userId: string) => {
   const existUser: TUser | null = await User.findById(id);
 
@@ -548,6 +693,7 @@ const blockedUser = async (id: string, userId: string) => {
 
 export const userService = {
   createUserToken,
+  email,
   otpVerifyAndCreateUser,
   creatorUserService,
   switchRoleUser,

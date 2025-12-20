@@ -1,52 +1,158 @@
 
 
 export const getDeliveryEmailTemplate = (creatorName: string) => {
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px;">
-      <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #4CAF50; margin: 0; font-size: 28px;">🎉 Task Successfully Delivered!</h1>
-          <div style="height: 3px; background: linear-gradient(90deg, #4CAF50, #45a049); margin: 10px auto; width: 100px;"></div>
-        </div>
-        
-        <!-- Greeting -->
-        <div style="margin-bottom: 25px;">
-          <h2 style="color: #333; margin-bottom: 15px;">Hello ${creatorName},</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
-            We're excited to inform you that your task has been successfully delivered to the client!
-          </p>
-        </div>
-        
-        <!-- Main Content -->
-        <div style="background-color: #f8fff8; border-left: 4px solid #4CAF50; padding: 20px; margin: 25px 0; border-radius: 4px;">
-          <h3 style="color: #2E7D32; margin-top: 0;">Delivery Confirmed ✅</h3>
-          <p style="color: #555; margin: 10px 0; line-height: 1.6;">
-            Your hard work has been officially submitted and accepted. The client has reviewed and approved the delivery. You contact to admin and take to payment!.
-          </p>
-        </div>
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
 
-        <!-- Appreciation -->
-        <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px;">
-          <p style="color: white; font-size: 18px; margin: 0; font-weight: bold;">
-            Thank you for your excellent work and dedication!
-          </p>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
+
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          DELIVERY<br>ACCEPTED!
+        </h1>
+      </td>
+      <td align="right">
+        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
         </div>
-        
-        <!-- Contact Support -->
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-          <p style="color: #888; font-size: 14px;">
-            If you have any questions, please contact our support team.
-          </p>
-          <p style="color: #666; font-size: 14px; margin: 5px 0;">
-            Best regards,<br>
-            <strong>The Team</strong>
-          </p>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello ${creatorName},
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      Great news! Your delivery for Project ID: cbjscslkcmsömc has been officially accepted by the client.
+    </p>
+    <p style="margin-bottom:15px;">
+      Thank you for your hard work, professionalism, and creativity. The client is very happy with the results.
+    </p>
+    <p style="margin-bottom:15px;">
+      We will contact you shortly to request your bank details so we can process your payment.
+    </p>
+    <p style="margin-bottom:15px;">
+      If you have any questions, feel free to reach out.
+    </p>
+    <p style="margin-bottom:15px;">
+      Keep up the amazing work!
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
         </div>
-      </div>
-    </div>
-  `;
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
 };
+
 
 
 export const getAdminNotificationEmailTemplate = (
@@ -59,78 +165,264 @@ export const getAdminNotificationEmailTemplate = (
     day: 'numeric',
   });
 
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background-color: #f9f9f9; padding: 20px;">
-      <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #2196F3; margin: 0; font-size: 28px;">📊 Project Delivery Report</h1>
-          <div style="height: 3px; background: linear-gradient(90deg, #2196F3, #1976D2); margin: 10px auto; width: 120px;"></div>
-          <p style="color: #666; margin: 10px 0;">Date: ${currentDate}</p>
-        </div>
-        
-        <!-- Project Summary -->
-        <div style="margin-bottom: 25px;">
-          <h2 style="color: #333; margin-bottom: 15px;">Project Summary</h2>
-          <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;">
-            <p style="margin: 5px 0; color: #555;">
-              <strong>Project ID:</strong> ${hireCreatorDetails._id || 'N/A'}
-            </p>
-            <p style="margin: 5px 0; color: #555;">
-              <strong>Status:</strong> <span style="color: #4CAF50; font-weight: bold;">Delivered ✅</span>
-            </p>
-            <p style="margin: 5px 0; color: #555;">
-              <strong>Total Creators:</strong> ${creators.length}
-            </p>
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Report</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Source Serif 4", serif;
+}
+
+body {
+  background-color: #f0f0f0;
+  padding: 20px;
+}
+
+.report-container {
+  width: 600px;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+.header {
+  background-color: #b5c4d4;
+  padding: 40px;
+  color: #ffffff;
+}
+
+.header table {
+  width: 100%;
+}
+
+.header h1 {
+  font-size: 42px;
+  letter-spacing: 2px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.logo-circle {
+  background-color: #fce8a4;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  text-align: center;
+  color: #000;
+}
+
+.logo-circle strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 22px;
+  padding-top: 10px;
+}
+
+.logo-circle span {
+  display: block;
+  font-size: 8px;
+}
+
+.content {
+  padding: 40px;
+}
+
+.content h2 {
+  font-size: 24px;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.summary-card {
+  background-color: #f1ede4;
+  border-radius: 40px;
+  padding: 40px;
+}
+
+.project-info p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.creator-table {
+  width: 100%;
+  margin-top: 30px;
+  border-collapse: collapse;
+}
+
+.creator-table th {
+  text-align: left;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  font-size: 14px;
+}
+
+.creator-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.creator-table a {
+  color:  #222222;
+  text-decoration: none;
+}
+
+.automated-note {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
+.footer {
+  background-color: #fce8a4;
+  padding: 40px;
+}
+
+.footer table {
+  width: 100%;
+}
+
+.footer h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.footer p {
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #222222;
+}
+
+.illustration {
+  font-size: 90px;
+  text-align: right;
+}
+</style>
+</head>
+
+<body>
+
+<div class="report-container">
+
+  <div class="header">
+    <table>
+      <tr>
+        <td align="left">
+          <h1>DELIVERY<br>REPORT</h1>
+        </td>
+        <td align="right">
+          <div class="logo-circle">
+            <strong>TSC</strong>
+            <span>THE SOCIAL CHANCE</span>
           </div>
-        </div>
-        
-        <!-- Creators List -->
-        <div style="margin: 25px 0;">
-          <h2 style="color: #333; margin-bottom: 15px;">🎯 Creators Involved</h2>
-          <div style="background-color: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse;">
-              <thead>
-                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                  <th style="padding: 12px 15px; text-align: left; color: white; border-bottom: 1px solid #e0e0e0;">#</th>
-                  <th style="padding: 12px 15px; text-align: left; color: white; border-bottom: 1px solid #e0e0e0;">Creator Name</th>
-                  <th style="padding: 12px 15px; text-align: left; color: white; border-bottom: 1px solid #e0e0e0;">Email</th>
-                  <th style="padding: 12px 15px; text-align: left; color: white; border-bottom: 1px solid #e0e0e0;">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${creators
-                  .map(
-                    (creator, index) => `
-                  <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : 'background-color: white;'}">
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #e0e0e0; color: #666;">${index + 1}</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #e0e0e0; color: #333; font-weight: 500;">${creator.creatorUserId.fullName || 'N/A'}</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #e0e0e0; color: #2196F3;">${creator.creatorUserId.email || 'N/A'}</td>
-                    <td style="padding: 12px 15px; border-bottom: 1px solid #e0e0e0;">
-                      <span style="color: #4CAF50; font-weight: bold;">Delivered ✅</span>
-                    </td>
-                  </tr>
-                `,
-                  )
-                  .join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <!-- Footer -->
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-          <p style="color: #888; font-size: 14px;">
-            This is an automated delivery report generated by the system.
-          </p>
-          <p style="color: #666; font-size: 14px; margin: 5px 0;">
-            Best regards,<br>
-            <strong>Project Management System</strong>
-          </p>
-        </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="content">
+    <h2>Project summary</h2>
+
+    <div class="summary-card">
+      <div class="project-info">
+        <p><strong>Project ID :</strong> ${hireCreatorDetails._id}</p>
+        <p><strong>Status :</strong> Delivered</p>
+        <p><strong>Total Creators :</strong> ${creators.length}</p>
       </div>
+
+      <table class="creator-table">
+        <thead>
+          <tr>
+            <th>Creator name</th>
+            <th>Creator Email</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+        ${creators
+          .map(
+            (creator) => `
+                <tr>
+                  <td>${creator.creatorUserId.fullName}</td>
+                  <td><a href="mailto:${creator.creatorUserId.email}">${creator.creatorUserId.email}</a></td>
+                  <td>Delivered</td>
+                </tr>
+              `,
+          )
+          .join('')}
+        </tbody>
+      </table>
     </div>
-  `;
+
+    <p class="automated-note">This is an automated email, do not reply.</p>
+  </div>
+
+  <div class="footer">
+    <table>
+      <tr>
+        <td align="left">
+          <h3>Support email.</h3>
+         
+          <p>
+  <a
+    href="mailto:Shamimnader@thesocialchance.com"
+    style="color:#000000; text-decoration:none; font-weight:500;"
+  >
+    Shamimnader@thesocialchance.com
+  </a>
+</p>
+
+<p>
+  <a
+    href="mailto:Fareshtanader@thesocialchance.com"
+    style="color:#000000; text-decoration:none; font-weight:500;"
+  >
+    Fareshtanader@thesocialchance.com
+  </a>
+</p>
+
+
+          <div style="margin-top:20px;">
+            <a href="https://google.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" alt="Website" style="margin-right:12px; vertical-align:middle;">
+            </a>
+
+            <a href="https://www.tiktok.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" alt="TikTok" style="margin-right:12px; vertical-align:middle;">
+            </a>
+
+            <a href="https://www.instagram.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" alt="Instagram" style="margin-right:12px; vertical-align:middle;">
+            </a>
+
+            <a href="https://x.com" target="_blank">
+              <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20" alt="X" style="vertical-align:middle;">
+            </a>
+          </div>
+        </td>
+
+        <td align="right" valign="bottom">
+          <div class="illustration">📢</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+</body>
+</html>`;
 };
 
 
@@ -169,60 +461,452 @@ export const getRevisionEmailTemplate = (payload: any) => {
 
 
 
-export const getScriptAcceptOrCancelRequestEmailTemplate = (
-  hireCreatorName: string,
-) => {
+export const getScriptBrandCreatorEmailTemplate = (hireCreatorName: string) => {
   return `
-    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-      <h2 style="margin-bottom: 12px;">New Script Added For Your Review</h2>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
 
-      <p>Hello ${hireCreatorName},</p>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
 
-      <p>
-        An admin has added a new script for your project because no script was submitted from your side.
-      </p>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
 
-      <p>
-        Please review the script and choose whether you want to <strong>accept</strong> it or <strong>cancel</strong>.
-      </p>
+table {
+  border-collapse: collapse;
+}
 
-      <p>
-        You can check the full script and respond directly from your website.
-      </p>
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
 
-      <p style="margin-top: 30px;">Best regards,<br/>Lunq Team</p>
-    </div>
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          SCRIPT<br>DELIVERY!
+        </h1>
+      </td>
+      <td align="right">
+        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello ${hireCreatorName},
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      Since no script was provided for the Project ID: hfcnsncnc, our admin has uploaded a suggested script to keep everything moving forward. You can find the script in your user account under the Order.
+    </p>
+    <p style="margin-bottom:15px;">
+      Please review and confirm the script at your earliest convenience. If you would like to request changes,please note that you can request one revision only. After that, the script will be finalized so production can begin.
+    </p>
+    <p style="margin-bottom:15px;">
+      We will contact you shortly to request your bank details so we can process your payment.
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
+        </div>
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+
   `;
 };
 
 
-export const getScriptAcceptOrCancelFromHireCreatorEmailTemplate = (
+export const getScriptAcceptFromHireCreatorEmailTemplate = (
   payload: any
 ) => {
-  const { hireCreatorName, status } = payload;
+  const {  hireCreatorID } = payload;
 
-  const statusExplanation =
-    status === 'accepted'
-      ? 'The hire creator reviewed the script added by the admin and approved it.'
-      : 'The hire creator reviewed the script added by the admin and rejected it.';
 
-    return `
-    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-      <h2 style="margin-bottom: 12px;">Script Response From Hire Creator</h2>
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
 
-      <p>Hello Admin,</p>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
 
-      <p>
-        <strong>${hireCreatorName}</strong> has <strong>${statusExplanation}</strong>.
-      </p>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
 
-      <p>
-        Please check the dashboard for more details and next steps.
-      </p>
+table {
+  border-collapse: collapse;
+}
 
-      <p style="margin-top: 30px;">Best regards,<br/>Lunq System</p>
-    </div>
-  `;
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
+
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          SCRIPT<br>ACCEPTED!
+        </h1>
+      </td>
+      <td align="right">
+        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello Admin,
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      The user has accepted the script added by the admin for Project ID: ${hireCreatorID}
+    </p>
+    <p style="margin-bottom:15px;">
+      Please check the dashboard for more details and proceed with the next steps.
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
+        </div>
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>`;
+  
+};
+
+
+export const getScriptCanceledFromHireCreatorEmailTemplate = (
+  payload: any
+) => {
+  const {  hireCreatorID } = payload;
+
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
+
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          SCRIPT<br>REJECTED!
+        </h1>
+      </td>
+      <td align="right">
+        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello Admin,
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      The user has reviewed the script added by the admin for Project ID: ${hireCreatorID} and has rejected it.
+    </p>
+    <p style="margin-bottom:15px;">
+      Please check the dashboard for more details and proceed with the next steps.
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
+        </div>
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>`;
   
 };
 

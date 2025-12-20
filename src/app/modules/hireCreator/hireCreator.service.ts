@@ -21,7 +21,7 @@ import { CLIENT_RENEG_LIMIT } from 'tls';
 import { configDotenv } from 'dotenv';
 import AssignTaskCreator from '../assignTaskCreator/assignTaskCreator.model';
 import { sendEmail } from '../../utils/mailSender';
-import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate, getScriptAcceptOrCancelFromHireCreatorEmailTemplate, getScriptAcceptOrCancelRequestEmailTemplate } from './hireCreator.utils';
+import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate, getScriptAcceptFromHireCreatorEmailTemplate,  getScriptBrandCreatorEmailTemplate, getScriptCanceledFromHireCreatorEmailTemplate } from './hireCreator.utils';
 
 // const createHireCreator = async ( payload: any) => {
 
@@ -1762,11 +1762,9 @@ const assignAddIsScriptByAdmin = async (
 
       await sendEmail(
         hireCreatoruser.email,
-        'Script Accept or Cancel Request from Admin! 🎉',
-        getScriptAcceptOrCancelRequestEmailTemplate(hireCreatoruser.fullName),
+        'Script Uploaded for Your Project Review 🎉',
+        getScriptBrandCreatorEmailTemplate(hireCreatoruser.fullName),
       );
-
-
 
 
       await session.commitTransaction();
@@ -1816,15 +1814,25 @@ const assignAddIsScriptByAdmin = async (
       }
 
       const acceptOrCancel = {
-        hireCreatorName: hireCreatoruser.fullName,
-        status: statusNew,
+        hireCreatorID: hireCreator._id
       };
 
-      await sendEmail(
-        admin.email,
-        `Script ${statusNew} from HireCreator! 🎉`,
-        getScriptAcceptOrCancelFromHireCreatorEmailTemplate(acceptOrCancel),
-      );
+
+      if (statusNew === 'accepted') {
+        await sendEmail(
+          admin.email,
+          `Script Accepted by User 🎉`,
+          getScriptAcceptFromHireCreatorEmailTemplate(acceptOrCancel),
+        );
+      }else{
+        await sendEmail(
+          admin.email,
+          `Script Canceled by User 🎉`,
+          getScriptCanceledFromHireCreatorEmailTemplate(acceptOrCancel),
+        );
+
+      }
+      
 
       
       await session.commitTransaction();
@@ -2165,7 +2173,7 @@ const assignTaskRevisionByUser = async (
         try {
           await sendEmail(
             creator.creatorUserId.email,
-            'Task Successfully Delivered! 🎉',
+            'Delivery Accepted Notification! 🎉',
             getDeliveryEmailTemplate(creator.creatorUserId.fullName),
           );
         } catch (error) {

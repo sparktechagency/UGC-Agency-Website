@@ -29,6 +29,18 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const email = catchAsync(async (req, res) => {
+  const newUser = await userService.email();
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Email Sending successfully!',
+    data: newUser,
+  });
+});
+
+
 const userCreateVarification = catchAsync(async (req, res) => {
   const token = req.headers?.token as string;
   const { otp } = req.body;
@@ -183,6 +195,7 @@ const deleteMyAccount = catchAsync(async (req: Request, res: Response) => {
 
 export const userController = {
   createUser,
+  email,
   userCreateVarification,
   creatorUser,
   switchRoleUser,
