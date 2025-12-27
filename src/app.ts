@@ -15,8 +15,6 @@ import { paymentController } from './app/modules/payment/payment.controller';
 const app: Application = express();
 
 
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'ejs');
 
 app.post(
   '/api/v1/payment/the-social-chance-stripe-webhook',
@@ -54,8 +52,6 @@ app.use(
 );
 
 
-// Remove duplicate static middleware
-// app.use(app.static('public'));
 
 // application routes
 app.use('/api/v1', router);
