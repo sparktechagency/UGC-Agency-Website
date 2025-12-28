@@ -181,8 +181,8 @@ const createPaypalPaymentService = async (payload: any) => {
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
         return_url: `https://api.thesocialchance.com/api/v1/payment/success?orderId=${payload.orderId}`,
         cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel?orderId=${payload.orderId}`,
-        // return_url: `http://10.10.7.65:5002/api/v1/payment/success?orderId=${payload.orderId}`,
-        // cancel_url: `http://10.10.7.65:5002/api/v1/payment/cancel?orderId=${payload.orderId}`,
+        // return_url: `http://10.10.7.65:5000/api/v1/payment/success?orderId=${payload.orderId}`,
+        // cancel_url: `http://10.10.7.65:5000/api/v1/payment/cancel?orderId=${payload.orderId}`,
       },
     });
 
@@ -239,8 +239,8 @@ const createPaypalPaymentServiceDirect = async (payload: any) => {
         // cancel_url: `${config.paypal.paypal_campaign_run_payment_cancel_url}`,
         return_url: `https://api.thesocialchance.com/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
         cancel_url: `https://api.thesocialchance.com/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
-        // return_url: `http://10.10.7.107:5002/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
-        // cancel_url: `http://10.10.7.107:5002/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
+        // return_url: `http://10.10.7.107:5000/api/v1/payment/success-page?subscriptionId=${payload.subscriptionId}`,
+        // cancel_url: `http://10.10.7.107:5000/api/v1/payment/cancel-page?subscriptionId=${payload.subscriptionId}`,
       },
     });
 

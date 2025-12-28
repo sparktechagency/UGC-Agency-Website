@@ -2184,11 +2184,15 @@ const assignTaskRevisionByUser = async (
         }
       });
 
+      const admin = await User.findOne({ role: 'admin' }).session(session);
+      if (!admin) {
+        throw new AppError(404, 'Admin not found!');
+      }
+
       // Send admin notification email
       try {
-        const adminEmail = 'delwarbscse@gmail.com';
         await sendEmail(
-          adminEmail,
+          admin.email,
           `Project Delivery Report - ${updateHireCreator._id}`,
           getAdminNotificationEmailTemplate(
             deliveryAssignCreator,
