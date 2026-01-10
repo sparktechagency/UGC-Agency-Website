@@ -18,6 +18,8 @@ import Otp from '../otp/otp.model';
 import { imageUrlGenarate } from '../../utils/imageUrl';
 import { sendEmail } from '../../utils/mailSender';
 import { getDeliveryEmailTemplate } from '../hireCreator/hireCreator.utils';
+import { unlink } from 'fs/promises';
+import { uploadToS3 } from '../../utils/s3';
 
 export type IFilter = {
   searchTerm?: string;
@@ -518,19 +520,44 @@ const switchRoleUser = async (id: string) => {
 //   }
 // };
 
-const updateUser = async (id: string, payload: Partial<TUser>) => {
-  console.log('payload=', payload);
-  const { role, email, ...rest } = payload;
-  console.log('rest', rest);
-  rest.profile = imageUrlGenarate(rest.profile as string);
+const updateUser = async (id: string, payload: Partial<TUser>, files?: any) => {
+  try {
+    console.log('payload=', payload);
 
-  const user = await User.findByIdAndUpdate(id, rest, { new: true });
+    // console.log('rest', rest);
+    console.log('files', files);
 
-  if (!user) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'User updating failed');
+    if (files?.profile && files?.profile?.length > 0) {
+      console.log('hit hise');
+      const profile: any = await uploadToS3({
+        file: files.profile[0],
+        fileName: files.profile[0].originalname,
+        folder: 'profiles/',
+      });
+      payload.profile = profile;
+    }
+
+    const { role, email, ...rest } = payload;
+    console.log('payload ===', payload);
+    console.log('rest ===', rest);
+    const result = await User.findByIdAndUpdate(id, rest, { new: true });
+
+    if (!result) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User updating failed!');
+    }
+
+    if (files?.profile && files?.profile?.length > 0 && result) {
+      const fileDeletePath = `${files?.profile[0]?.path}`;
+      await unlink(fileDeletePath);
+    }
+
+    return result;
+  } catch (error: any) {
+    const fileDeletePath = `${files?.profile[0]?.path}`;
+    await unlink(fileDeletePath);
+
+    throw new AppError(error.statusCode, error.message);
   }
-
-  return user;
 };
 
 // ............................rest

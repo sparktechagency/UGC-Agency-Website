@@ -18,23 +18,14 @@ userRoutes
     validateRequest(userValidation?.userValidationSchema),
     userController.createUser,
   )
-  .post(
-    '/email',
-    userController.email,
-  )
+  .post('/email', userController.email)
   .post(
     '/create-user-verify-otp',
     validateRequest(resentOtpValidations.verifyOtpZodSchema),
     userController.userCreateVarification,
   )
   .post('/create-creator', userController.creatorUser)
-  .post(
-    '/roleSwitch/:id',
-    auth(
-      USER_ROLE.ADMIN,
-    ),
-    userController.switchRoleUser,
-  )
+  .post('/roleSwitch/:id', auth(USER_ROLE.ADMIN), userController.switchRoleUser)
   // .post(
   //   '/swich-role',
   //   auth(USER_ROLE.CUSTOMER, USER_ROLE.BUSINESS),
@@ -65,8 +56,8 @@ userRoutes
       USER_ROLE.SUB_ADMIN,
       USER_ROLE.SUPER_ADMIN,
     ),
-    upload.single('profile'),
-    parseData(),
+    upload.fields([{ name: 'profile' }]),
+    // parseData(),
     userController.updateMyProfile,
   )
   .patch(

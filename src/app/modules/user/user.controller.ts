@@ -159,11 +159,9 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
-  if (req?.file) {
-    req.body.profile = storeFile('profile', req?.file?.filename);
-  }
+   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-  const result = await userService.updateUser(req?.user?.userId, req.body);
+  const result = await userService.updateUser(req?.user?.userId, req.body, files);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
