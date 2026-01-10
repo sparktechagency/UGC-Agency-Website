@@ -2,11 +2,11 @@ import { Types } from "mongoose";
 
 export type TCreator = {
   userId: Types.ObjectId;
-  profile: string;
+  // profile: string;
   fullName: any;
   email: string;
   password: any;
-  phone: string;
+  // phone: string;
   dateOfBirth: string;
   country: string;
   state: string;
@@ -14,7 +14,7 @@ export type TCreator = {
   city: string;
   street: string;
   houseBuildingNo: string;
-  niche: string;
+  niche: [string];
   language: string;
   profession: string;
   gender: string;
@@ -33,13 +33,13 @@ export type TCreator = {
     url: string;
   }[];
   introductionvideo: string;
-  bankType: string;
-  accountHolderName: string;
-  accountNumber: string;
-  swiftCode: string;
-  bankName: string;
-  iban: string;
-  paypalEmail: string;
+  // bankType: string;
+  // accountHolderName: string;
+  // accountNumber: string;
+  // swiftCode: string;
+  // bankName: string;
+  // iban: string;
+  // paypalEmail: string;
   status: string;
 };
  

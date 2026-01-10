@@ -31,7 +31,7 @@ const createCreator = async (files: any, payload: TCreator) => {
       throw new AppError(403, 'At least one File is required');
     }
 
-    const existCreator = await Creator.findOne({ email: payload.email });
+    const existCreator = await User.findOne({ email: payload.email });
     if (existCreator) {
       throw new AppError(403, 'Creator already exist');
     } 
@@ -51,21 +51,20 @@ const createCreator = async (files: any, payload: TCreator) => {
       const ugcExampleVideo: any = await uploadManyToS3(files.ugcExampleVideo, 'videos/');
       payload.ugcExampleVideo = ugcExampleVideo;
     }
-
+const userData:any = {
+  password: payload.password,
+  email: payload.email,
+  fullName: payload.fullName,
+  role: 'creator',
+};
     if (files.profile && files.profile.length > 0) {
       const image = files.profile[0].path.replace(/^public[\\/]/, '');
-      payload.profile = imageUrlGenarate(image);
+      userData.profile = imageUrlGenarate(image);
     }
 
     console.log('payload', payload);
 
-    const userData = {
-      password: payload.password,
-      email: payload.email,
-      fullName: payload.fullName,
-      role: 'creator',
-      profile: payload.profile,
-    };
+    
 
     const user = await User.create([userData], { session }); 
     payload.userId = new mongoose.Types.ObjectId(user[0]._id);
@@ -119,7 +118,7 @@ const getAllCreatorQuery = async (query: Record<string, unknown>) => {
   //   return JSON.parse(cachedCreator); // Return cached result
   // }
   const CreatorQuery = new QueryBuilder(
-    Creator.find().populate({path:'userId', select:"profile"}).select(
+    Creator.find().populate({path:'userId', select:"profile fullName"}).select(
       'accountHolderName phone email country status',
     ),
     query,
@@ -145,11 +144,18 @@ const getAllCreatorQuery = async (query: Record<string, unknown>) => {
   return responseData;
 };
 const getCreatorMeQuery = async (userId: string) => {
+  console.log('me hit hoise');
   // const cachedCreator = await redisClient.get('creator');
   // if (cachedCreator) {
   //   return JSON.parse(cachedCreator); // Return cached result
   // }
-  const result = await Creator.findOne({ userId }).populate({path:'userId', select:"fullName phone profile"});
+  const result:any = await Creator.findOne({ userId }).populate({
+    path: 'userId',
+    select: 'profile fullName email phone',
+  });
+  if(!result){
+    throw new AppError(404, 'Creator Not Found!!');
+  }
   // await redisClient.set(
   //   'creator',
   //   JSON.stringify(result),
@@ -157,21 +163,31 @@ const getCreatorMeQuery = async (userId: string) => {
   //   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
   //   // }
   // );
-  return result;
+   const newResult = {
+     ...result.toObject(),
+     fullName: result?.userId?.fullName,
+     profile: result?.userId?.profile,
+     email: result?.userId?.email,
+     phone: result?.userId?.phone
+   };
+  //  console.log('newResult =->>>>', newResult);
+  return newResult;
 };
 
 const getSingleCreatorQuery = async (id: string) => {
+  console.log('hit hoise!!');
   // const cachedCreatorme = await redisClient.get(`creatorMe${id}`);
   // if (cachedCreatorme) {
   //   return JSON.parse(cachedCreatorme); // Return cached result
   // }
   const creator: any = await Creator.findById(id).populate({
     path: 'userId',
-    select: 'profile',
+    select: 'profile fullName email phone',
   });
   if (!creator) {
     throw new AppError(404, 'Creator Not Found!!');
   }
+ 
   // await redisClient.set(
   //   `creatorMe${id}`,
   //   JSON.stringify(creator),
@@ -179,7 +195,14 @@ const getSingleCreatorQuery = async (id: string) => {
   //   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
   //   // }
   // );
-  return creator;
+  const newResult = {
+    ...creator.toObject(),
+    fullName: creator?.userId?.fullName,
+    profile: creator?.userId?.profile,
+    email: creator?.userId?.email,
+    phone: creator?.userId?.phone,
+  };
+  return newResult;
 };
 
 
