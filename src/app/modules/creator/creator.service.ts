@@ -20,7 +20,7 @@ const createCreator = async (files: any, payload: TCreator) => {
     console.log('Creator payload=', payload);
     console.log('Creator files=', files);
 
-    if(!payload.email || !payload.password || !payload.fullName || !files.profile){
+    if(!payload.email || !payload.password || !payload.fullName){
       throw new AppError(
         403,
         'Email, Password, Full Name, profile is required',
@@ -38,7 +38,7 @@ const createCreator = async (files: any, payload: TCreator) => {
 
     // buffer convert
 
-    if (files.introductionvideo && files.introductionvideo.length > 0) {
+    if (files && files?.introductionvideo && files?.introductionvideo?.length > 0) {
       const introductionVideo: any = await uploadToS3({
         file: files.introductionvideo[0],
         fileName: files.introductionvideo[0].originalname,
@@ -47,7 +47,7 @@ const createCreator = async (files: any, payload: TCreator) => {
       payload.introductionvideo = introductionVideo;
     }
 
-    if (files.ugcExampleVideo && files.ugcExampleVideo.length > 0) {
+    if (files?.ugcExampleVideo && files?.ugcExampleVideo?.length > 0) {
       const ugcExampleVideo: any = await uploadManyToS3(files.ugcExampleVideo, 'videos/');
       payload.ugcExampleVideo = ugcExampleVideo;
     }
@@ -57,10 +57,17 @@ const userData:any = {
   fullName: payload.fullName,
   role: 'creator',
 };
-    if (files.profile && files.profile.length > 0) {
-      const image = files.profile[0].path.replace(/^public[\\/]/, '');
-      userData.profile = imageUrlGenarate(image);
-    }
+   
+
+     if (files?.profile && files?.profile?.length > 0) {
+       console.log('hit hise');
+       const profile: any = await uploadToS3({
+         file: files.profile[0],
+         fileName: files.profile[0].originalname,
+         folder: 'profiles/',
+       });
+       userData.profile = profile;
+     }
 
     console.log('payload', payload);
 
@@ -80,29 +87,43 @@ const userData:any = {
       );
       await Promise.all(allVideo.map((path: any) => unlink(path)));
     }
+    if (files?.profile && files?.profile?.length > 0) {
+      const fileDeletePath = `${files.profile[0].path}`;
+      await unlink(fileDeletePath);
+      
+    }
 
     await session.commitTransaction();
 
     return result[0];
   } catch (error : any) {
     console.log('error----', error);
-    const fileDeletePath = `${files.introductionvideo[0].path}`;
-    await unlink(fileDeletePath);
-    const profileDeletePath = `${files.profile[0].path}`;
-    await unlink(profileDeletePath);
+    if (files?.profile && files?.profile?.length > 0) {
+      const profileDeletePath = `${files.profile[0].path}`;
+      await unlink(profileDeletePath);
+       const key = `profiles/${files.profile[0].originalname}`;
+       await deleteFromS3(key);
 
-    const allVideo = files.ugcExampleVideo.map((video: any) => `${video.path}`);
-    await Promise.all(allVideo.map((path: any) => unlink(path)));
+    }
 
-    const key = `videos/${files.introductionvideo[0].originalname}`; 
-    await deleteFromS3(key);
+    if (files?.introductionvideo && files?.ugcExampleVideo) {
+       const allVideo = files.ugcExampleVideo.map(
+         (video: any) => `${video.path}`,
+       );
+       await Promise.all(allVideo.map((path: any) => unlink(path)));
 
-    await Promise.all(
-      files.ugcExampleVideo.map((video: any) => { 
-        const videoKey = `videos/${video.originalname}`;
-        return deleteFromS3(videoKey);
-      }),
-    );
+       const key = `videos/${files.introductionvideo[0].originalname}`;
+       await deleteFromS3(key);
+
+       await Promise.all(
+         files.ugcExampleVideo.map((video: any) => {
+           const videoKey = `videos/${video.originalname}`;
+           return deleteFromS3(videoKey);
+         }),
+       );
+    }
+  
+   
 
     throw error;
   
