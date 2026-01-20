@@ -25,7 +25,7 @@ creatorRouter
   )
   .get(
     '/',
-    //  auth(USER_ROLE.ADMIN),
+     auth(USER_ROLE.ADMIN),
     creatorController.getAllCreator,
   )
   .get('/me', auth(USER_ROLE.CREATOR), creatorController.getCreatorMe)

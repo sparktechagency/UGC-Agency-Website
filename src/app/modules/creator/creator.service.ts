@@ -51,10 +51,11 @@ const createCreator = async (files: any, payload: TCreator) => {
       const ugcExampleVideo: any = await uploadManyToS3(files.ugcExampleVideo, 'videos/');
       payload.ugcExampleVideo = ugcExampleVideo;
     }
-const userData:any = {
+const userData: any = {
   password: payload.password,
   email: payload.email,
   fullName: payload.fullName,
+  phone: payload.phone,
   role: 'creator',
 };
    
@@ -72,12 +73,9 @@ const userData:any = {
     console.log('payload', payload);
 
     
-
     const user = await User.create([userData], { session }); 
     payload.userId = new mongoose.Types.ObjectId(user[0]._id);
     const result = await Creator.create([payload], { session }); 
-
-    
 
     if (result) {
       const fileDeletePath = `${files.introductionvideo[0].path}`;
@@ -139,7 +137,7 @@ const getAllCreatorQuery = async (query: Record<string, unknown>) => {
   //   return JSON.parse(cachedCreator); // Return cached result
   // }
   const CreatorQuery = new QueryBuilder(
-    Creator.find().populate({path:'userId', select:"profile fullName"}).select(
+    Creator.find().populate({path:'userId', select:"profile fullName email phone"}).select(
       'accountHolderName phone email country status',
     ),
     query,

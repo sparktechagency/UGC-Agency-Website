@@ -6,7 +6,7 @@ export type TCreator = {
   fullName: any;
   email: string;
   password: any;
-  // phone: string;
+  phone: string;
   dateOfBirth: string;
   country: string;
   state: string;
