@@ -49,6 +49,8 @@ import config from '../config';
 
 // export default paypalClient;
 
+// console.log('config.paypalClientId', config.paypalClientId);
+// console.log('config.paypalSecretId', config.paypalSecretId);
 
 const environment =
   config.PAYPAL_MODE === 'live'

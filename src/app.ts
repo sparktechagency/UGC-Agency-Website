@@ -21,7 +21,7 @@ app.post(
   express.raw({ type: 'application/json' }),
   paymentController.conformWebhook,
 );
-// stripe listen --forward-to http://10.10.7.107:5002/api/v1/payment/the-social-chance-stripe-webhook
+// stripe listen --forward-to http://10.10.7.65:5000/api/v1/payment/the-social-chance-stripe-webhook
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 

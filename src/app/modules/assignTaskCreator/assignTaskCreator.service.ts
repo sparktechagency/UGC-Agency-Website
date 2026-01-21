@@ -214,6 +214,8 @@ const finallyCreateAssignBrandCreator = async (
       status: 'approved',
     }).session(session);
 
+    console.log('approvedDocs *****', approvedDocs);
+
     // all creators chat create
     await Promise.all(
       approvedDocs.map(async (doc) => {
@@ -223,6 +225,7 @@ const finallyCreateAssignBrandCreator = async (
         const existChat = await Chat.findOne({
           participants: { $all: [admin._id, creatorUserId] },
         }).session(session);
+        console.log('existChat===', existChat);
 
         if (!existChat) {
           const chat = new Chat({

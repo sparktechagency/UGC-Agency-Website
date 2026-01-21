@@ -21,7 +21,7 @@ import { CLIENT_RENEG_LIMIT } from 'tls';
 import { configDotenv } from 'dotenv';
 import AssignTaskCreator from '../assignTaskCreator/assignTaskCreator.model';
 import { sendEmail } from '../../utils/mailSender';
-import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate, getScriptAcceptFromHireCreatorEmailTemplate,  getScriptBrandCreatorEmailTemplate, getScriptCanceledFromHireCreatorEmailTemplate } from './hireCreator.utils';
+import { getAdminNotificationEmailTemplate, getDeliveryEmailTemplate, getMailAdminFromHireCreatorForVideoRevision, getRevisionEmailTemplate, getScriptAcceptFromHireCreatorEmailTemplate,  getScriptBrandCreatorEmailTemplate, getScriptCanceledFromHireCreatorEmailTemplate } from './hireCreator.utils';
 
 // const createHireCreator = async ( payload: any) => {
 
@@ -2079,15 +2079,16 @@ const assignTaskRevisionByUser = async (
 
       const revisionData:any = {
         hireCreatorId: updateHireCreator._id,
-        brandCreatorName: brandCreator.fullName,
-        brandCreatorEmail: brandCreator.fullName
+        brandCreatorName: brandCreator.email
       };
       
-
       await sendEmail(
-        admin.email,
+        'dev.humayonforid44@gmail.com',
         'Revision Request from Hire Creator 🎉',
-        getDeliveryEmailTemplate(revisionData),
+        getMailAdminFromHireCreatorForVideoRevision(
+          revisionData.hireCreatorId,
+          revisionData.brandCreatorName,
+        ),
       );
 
       // const assignCreator = await AssignTaskCreator.updateMany(

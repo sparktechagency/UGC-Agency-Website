@@ -49,9 +49,13 @@ h1, h2, h3, p {
         </h1>
       </td>
       <td align="right">
-        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
-          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
-          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
         </div>
       </td>
     </tr>
@@ -322,11 +326,15 @@ body {
           <h1>DELIVERY<br>REPORT</h1>
         </td>
         <td align="right">
-          <div class="logo-circle">
-            <strong>TSC</strong>
-            <span>THE SOCIAL CHANCE</span>
-          </div>
-        </td>
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
+        </div>
+      </td>
       </tr>
     </table>
   </div>
@@ -427,8 +435,7 @@ body {
 
 
 
-export const getRevisionEmailTemplate = (payload: any) => {
-  const { hireCreatorId, brandCreatorName, brandCreatorEmail } = payload;
+export const getRevisionEmailTemplate = (hireCreatorId: string, name: any) => {
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; color: #333;">
@@ -443,8 +450,7 @@ export const getRevisionEmailTemplate = (payload: any) => {
 
           <table style="margin: 20px 0; padding: 15px; background: #f7f7f7; border-radius: 6px;">
             <tr><td><strong>Hire Creator ID:</strong> ${hireCreatorId}</td></tr>
-            <tr><td><strong>Brand Creator Name:</strong> ${brandCreatorName}</td></tr>
-            <tr><td><strong>Brand Creator Email:</strong> ${brandCreatorEmail}</td></tr>
+            <tr><td><strong>Brand Creator Name:</strong> ${name}</td></tr>
           </table>
 
           <p>Please check the dashboard to review and respond.</p>
@@ -458,7 +464,6 @@ export const getRevisionEmailTemplate = (payload: any) => {
     </table>
   `;
 };
-
 
 
 export const getScriptBrandCreatorEmailTemplate = (hireCreatorName: string) => {
@@ -510,10 +515,14 @@ h1, h2, h3, p {
           SCRIPT<br>DELIVERY!
         </h1>
       </td>
-      <td align="right">
-        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
-          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
-          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+     <td align="right">
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
         </div>
       </td>
     </tr>
@@ -665,9 +674,13 @@ h1, h2, h3, p {
         </h1>
       </td>
       <td align="right">
-        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
-          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
-          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
         </div>
       </td>
     </tr>
@@ -760,6 +773,503 @@ h1, h2, h3, p {
   
 };
 
+// export const getMailAdminFromHireCreatorForVideoRevision = (
+//   hirecreatorId: any, hireCreatorname: any
+// ) => {
+
+//     return `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+// <meta charset="UTF-8">
+// <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// <title>Delivery Accepted</title>
+
+// <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+// <style>
+// body {
+//   margin: 0;
+//   padding: 0;
+//   background-color: #f4f4f4;
+// }
+
+// table {
+//   border-collapse: collapse;
+// }
+
+// h1, h2, h3, p {
+//   margin: 0;
+//   padding: 0;
+//   font-family: "Source Serif 4", serif;
+// }
+// </style>
+// </head>
+
+// <body>
+
+// <table width="100%" cellpadding="0" cellspacing="0">
+// <tr>
+// <td align="center" style="padding:20px 0;">
+
+// <!-- EMAIL CONTAINER -->
+// <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+// <!-- HEADER -->
+// <tr>
+// <td style="background:#b5c4d4; padding:40px;">
+//   <table width="100%">
+//     <tr>
+//       <td align="left">
+//         <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+//           ORDER<br>REVISION!
+//         </h1>
+//       </td>
+//       <td align="right">
+//         <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
+//           <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
+//           <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+//         </div>
+//       </td>
+//     </tr>
+//   </table>
+// </td>
+// </tr>
+
+// <!-- CONTENT -->
+// <tr>
+// <td style="padding:40px;">
+//   <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+//     Hello Admin,
+//   </h2>
+
+//   <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+//     <p style="margin-bottom:15px;">
+//       Great news! Your delivery for Project ID: cbjscslkcmsömc has been officially accepted by the client.
+//     </p>
+//     <p style="margin-bottom:15px;">
+//       Thank you for your hard work, professionalism, and creativity. The client is very happy with the results.
+//     </p>
+//     <p style="margin-bottom:15px;">
+//       We will contact you shortly to request your bank details so we can process your payment.
+//     </p>
+//     <p style="margin-bottom:15px;">
+//       If you have any questions, feel free to reach out.
+//     </p>
+//     <p style="margin-bottom:15px;">
+//       Keep up the amazing work!
+//     </p>
+//     <p style="margin-top:20px;">
+//       Best Regards,<br>The Social Chance
+//     </p>
+//   </div>
+
+//   <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+//     This is an automated email, do not reply.
+//   </p>
+// </td>
+// </tr>
+
+// <!-- FOOTER -->
+// <tr>
+// <td style="background:#fce8a4; padding:40px;">
+//   <table width="100%">
+//     <tr>
+//       <td align="left">
+//         <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+//           Support email.
+//         </h3>
+
+//         <p style="margin-bottom:5px;">
+//           <a href="mailto:Shamimnader@thesocialchance.com"
+//              style="color:#000000; text-decoration:none; font-size:14px;">
+//             Shamimnader@thesocialchance.com
+//           </a>
+//         </p>
+
+//         <p style="margin-bottom:10px;">
+//           <a href="mailto:Fareshtanader@thesocialchance.com"
+//              style="color:#000000; text-decoration:none; font-size:14px;">
+//             Fareshtanader@thesocialchance.com
+//           </a>
+//         </p>
+
+//         <div style="margin-top:20px;">
+//           <a href="https://google.com">
+//             <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+//           </a>
+//           <a href="https://www.tiktok.com">
+//             <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+//           </a>
+//           <a href="https://www.instagram.com">
+//             <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+//           </a>
+//           <a href="https://x.com">
+//             <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+//           </a>
+//         </div>
+//       </td>
+
+//       <td align="right" valign="bottom">
+//         <div style="font-size:90px; opacity:0.7;">📢</div>
+//       </td>
+//     </tr>
+//   </table>
+// </td>
+// </tr>
+
+// </table>
+// <!-- END CONTAINER -->
+
+// </td>
+// </tr>
+// </table>
+
+// </body>
+// </html>
+// `;
+  
+// };
+
+
+export const getMailAdminFromHireCreatorForVideoRevision = (
+  hirecreatorId: any,
+  hireCreatorname: any,
+) => {
+
+   return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Accepted</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Serif 4", serif;
+}
+</style>
+</head>
+
+<body>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center" style="padding:20px 0;">
+
+<!-- EMAIL CONTAINER -->
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+<!-- HEADER -->
+<tr>
+<td style="background:#b5c4d4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+          VIDEO REVISION<br>REQUEST!
+        </h1>
+      </td>
+      <td align="right">
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
+        </div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+  <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+    Hello Admin,
+  </h2>
+
+  <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+    <p style="margin-bottom:15px;">
+      Great news! Your delivery for Project ID: cbjscslkcmsömc has been officially accepted by the client.
+    </p>
+    <p style="margin-bottom:15px;">
+      Thank you for your hard work, professionalism, and creativity. The client is very happy with the results.
+    </p>
+    <p style="margin-bottom:15px;">
+      We will contact you shortly to request your bank details so we can process your payment.
+    </p>
+    <p style="margin-bottom:15px;">
+      If you have any questions, feel free to reach out.
+    </p>
+    <p style="margin-bottom:15px;">
+      Keep up the amazing work!
+    </p>
+    <p style="margin-top:20px;">
+      Best Regards,<br>The Social Chance
+    </p>
+  </div>
+
+  <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+    This is an automated email, do not reply.
+  </p>
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td style="background:#fce8a4; padding:40px;">
+  <table width="100%">
+    <tr>
+      <td align="left">
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+          Support email.
+        </h3>
+
+        <p style="margin-bottom:5px;">
+          <a href="mailto:Shamimnader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Shamimnader@thesocialchance.com
+          </a>
+        </p>
+
+        <p style="margin-bottom:10px;">
+          <a href="mailto:Fareshtanader@thesocialchance.com"
+             style="color:#000000; text-decoration:none; font-size:14px;">
+            Fareshtanader@thesocialchance.com
+          </a>
+        </p>
+
+        <div style="margin-top:20px;">
+          <a href="https://google.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.tiktok.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://www.instagram.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" style="margin-right:12px;">
+          </a>
+          <a href="https://x.com">
+            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20">
+          </a>
+        </div>
+      </td>
+
+      <td align="right" valign="bottom">
+        <div style="font-size:90px; opacity:0.7;">📢</div>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+
+</table>
+<!-- END CONTAINER -->
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`;
+//   return `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+// <meta charset="UTF-8">
+// <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// <title>Video Revision Request</title>
+
+// <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+// <style>
+// body {
+//   margin: 0;
+//   padding: 0;
+//   background-color: #f4f4f4;
+// }
+
+// table {
+//   border-collapse: collapse;
+// }
+
+// h1, h2, h3, p {
+//   margin: 0;
+//   padding: 0;
+//   font-family: "Source Serif 4", serif;
+// }
+
+// img {
+//   display: block;
+//   max-width: 100%;
+// }
+// </style>
+// </head>
+
+// <body>
+
+// <table width="100%" cellpadding="0" cellspacing="0">
+// <tr>
+// <td align="center" style="padding:20px 0;">
+
+// <!-- EMAIL CONTAINER -->
+// <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+
+// <!-- HEADER -->
+// <tr>
+// <td style="background:#b5c4d4; padding:40px;">
+//   <table width="100%">
+//     <tr>
+//       <td align="left">
+//         <h1 style="font-size:38px; color:#ffffff; font-weight:700; line-height:1.1;">
+//           VIDEO<br>REVISION REQUEST
+//         </h1>
+//       </td>
+//       <td align="right">
+//         <!-- Replace circular logo with image -->
+//         <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+//           <img src="https://www.bigfootdigital.co.uk/wp-content/uploads/2020/07/image-optimisation-scaled.jpg" 
+//                alt="The Social Chance Logo"
+//                width="85" 
+//                height="85"
+//                style="object-fit:cover; display:block;">
+//         </div>
+//       </td>
+//     </tr>
+//   </table>
+// </td>
+// </tr>
+
+// <!-- CONTENT -->
+// <tr>
+// <td style="padding:40px;">
+//   <h2 style="font-size:26px; font-weight:700; margin-bottom:25px;">
+//     Attention: Admin Team
+//   </h2>
+
+//   <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
+//     <p style="margin-bottom:15px; font-weight:600;">
+//       📋 <strong>Video Revision Required</strong>
+//     </p>
+    
+//     <p style="margin-bottom:15px;">
+//       This is to inform you that the client <strong>${hireCreatorname}</strong> has requested revisions for their video project.
+//     </p>
+    
+//     <p style="margin-bottom:15px;">
+//       <strong>Project Details:</strong><br>
+//       • Creator Name: ${hireCreatorname}<br>
+//       • Project ID: ${hirecreatorId}<br>
+//       • Status: Revision Requested
+//     </p>
+    
+//     <p style="margin-bottom:20px; background:#fff9e6; padding:15px; border-left:4px solid #ffcc00; border-radius:8px;">
+//       <strong>⚠️ Action Required:</strong><br>
+//       Please review the revision request and coordinate with the creator to address the client's feedback. Ensure all revision notes are clearly communicated.
+//     </p>
+    
+//     <p style="margin-bottom:15px;">
+//       <strong>Next Steps:</strong><br>
+//       1. Review the client's feedback<br>
+//       2. Contact creator for revision timeline<br>
+//       3. Update project status in system<br>
+//       4. Ensure quality check after revisions
+//     </p>
+    
+//     <p style="margin-bottom:15px;">
+//       Please monitor this project closely to ensure timely delivery of the revised video while maintaining quality standards.
+//     </p>
+    
+//     <p style="margin-top:25px; font-weight:600;">
+//       Best Regards,<br>
+//       <span style="color:#2c5282;">The Social Chance Team</span>
+//     </p>
+//   </div>
+
+//   <p style="text-align:center; font-size:13px; color:#888; margin-top:40px;">
+//     This is an automated notification. Please check the project management system for details.
+//   </p>
+// </td>
+// </tr>
+
+// <!-- FOOTER -->
+// <tr>
+// <td style="background:#fce8a4; padding:40px;">
+//   <table width="100%">
+//     <tr>
+//       <td align="left">
+//         <h3 style="font-size:16px; font-weight:700; margin-bottom:10px;">
+//           Need Assistance?
+//         </h3>
+
+//         <p style="margin-bottom:5px; font-size:14px;">
+//           <strong>Project Manager:</strong><br>
+//           <a href="mailto:Shamimnader@thesocialchance.com"
+//              style="color:#000000; text-decoration:none;">
+//             Shamim Nader
+//           </a>
+//         </p>
+
+//         <p style="margin-bottom:15px; font-size:14px;">
+//           <strong>Support Lead:</strong><br>
+//           <a href="mailto:Fareshtanader@thesocialchance.com"
+//              style="color:#000000; text-decoration:none;">
+//             Fareshta Nader
+//           </a>
+//         </p>
+
+//         <div style="margin-top:25px;">
+//           <a href="https://facebook.com/thesocialchance" style="text-decoration:none; margin-right:12px;">
+//             <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" width="20" height="20" alt="Facebook">
+//           </a>
+//           <a href="https://tiktok.com/@thesocialchance" style="text-decoration:none; margin-right:12px;">
+//             <img src="https://cdn-icons-png.flaticon.com/512/3046/3046126.png" width="20" height="20" alt="TikTok">
+//           </a>
+//           <a href="https://instagram.com/thesocialchance" style="text-decoration:none; margin-right:12px;">
+//             <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="20" height="20" alt="Instagram">
+//           </a>
+//           <a href="https://twitter.com/thesocialchance" style="text-decoration:none;">
+//             <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" width="20" height="20" alt="Twitter">
+//           </a>
+//         </div>
+//       </td>
+
+//       <td align="right" valign="bottom">
+//         <div style="font-size:90px; opacity:0.7;">🎬</div>
+//       </td>
+//     </tr>
+//   </table>
+// </td>
+// </tr>
+
+// </table>
+// <!-- END CONTAINER -->
+
+// </td>
+// </tr>
+// </table>
+
+// </body>
+// </html>
+// `;
+};
 
 export const getScriptCanceledFromHireCreatorEmailTemplate = (
   payload: any
@@ -815,9 +1325,13 @@ h1, h2, h3, p {
         </h1>
       </td>
       <td align="right">
-        <div style="width:85px; height:85px; background:#fce8a4; border-radius:50%; text-align:center;">
-          <div style="font-size:20px; font-weight:700; padding-top:22px; color:#000;">TSC</div>
-          <div style="font-size:7px; font-weight:500; color:#000;">THE SOCIAL CHANCE</div>
+        <!-- Replace circular logo with image -->
+        <div style="width:85px; height:85px; overflow:hidden; border-radius:50%;">
+          <img src="https://thesocialchangebucket.s3.eu-central-1.amazonaws.com/UGC.png" 
+               alt="The Social Chance Logo"
+               width="85" 
+               height="85"
+               style="object-fit:cover; display:block;">
         </div>
       </td>
     </tr>
