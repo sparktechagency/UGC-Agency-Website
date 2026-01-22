@@ -2077,9 +2077,17 @@ const assignTaskRevisionByUser = async (
       }
       console.log('BrandCreator', brandCreator);
 
+      const assignCreators: any = await AssignTaskCreator.find(
+        { hireCreatorId: id, status: 'completed' }
+      ).select('creatorUserId').populate({  path: 'creatorUserId', select: 'fullName email'}).session(session);
+      if (assignCreators.length === 0) {
+        throw new AppError(403, 'Update Assign Creator failed!!');
+      }
+console.log('assignCreators======', assignCreators);
       const revisionData:any = {
         hireCreatorId: updateHireCreator._id,
-        brandCreatorName: brandCreator.email
+        brandCreatorName: brandCreator.fullName,
+        creatorsList: assignCreators
       };
       
       await sendEmail(
@@ -2088,6 +2096,7 @@ const assignTaskRevisionByUser = async (
         getMailAdminFromHireCreatorForVideoRevision(
           revisionData.hireCreatorId,
           revisionData.brandCreatorName,
+          revisionData.creatorsList
         ),
       );
 
@@ -2174,7 +2183,7 @@ const assignTaskRevisionByUser = async (
         try {
           await sendEmail(
             creator.creatorUserId.email,
-            'Delivery Accepted Notification! 🎉',
+            'Delivery Accepted Notification!🎉',
             getDeliveryEmailTemplate(creator.creatorUserId.fullName),
           );
         } catch (error) {

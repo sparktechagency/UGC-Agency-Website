@@ -235,9 +235,9 @@ const getMyChatList = async (
   let chats;
   if (query && query.search && query.search !== '') {
     const searchRegExp = new RegExp('.*' + query.search + '.*', 'i');
-    const matchingUsers = await User.find({ fullName: searchRegExp , email: searchRegExp}).select(
-      '_id',
-    );
+    const matchingUsers = await User.find({
+      $or: [{ fullName: searchRegExp }, { email: searchRegExp }],
+    }).select('_id');
     const matchingUserIds = matchingUsers.map((u) => u._id);
 
     chats = await Chat.find({
