@@ -2091,7 +2091,7 @@ console.log('assignCreators======', assignCreators);
       };
       
       await sendEmail(
-        'dev.humayonforid44@gmail.com',
+        admin.email,
         'Revision Request from Hire Creator 🎉',
         getMailAdminFromHireCreatorForVideoRevision(
           revisionData.hireCreatorId,
