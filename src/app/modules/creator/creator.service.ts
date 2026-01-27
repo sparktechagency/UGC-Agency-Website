@@ -131,37 +131,136 @@ const userData: any = {
 };
 
 
-const getAllCreatorQuery = async (query: Record<string, unknown>) => {
-  // const cachedCreator = await redisClient.get('creators');
-  // if (cachedCreator) {
-  //   return JSON.parse(cachedCreator); // Return cached result
-  // }
-  const CreatorQuery = new QueryBuilder(
-    Creator.find().populate({path:'userId', select:"profile fullName email phone"}).select(
-      'accountHolderName phone email country status',
-    ),
-    query,
-  )
-    .search(['phone', 'email', 'country'])
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
+// const getAllCreatorQuery = async (query: Record<string, unknown>) => {
 
-  const result = await CreatorQuery.modelQuery;
+//   console.log('query creator search value =', query);
 
-  const meta = await CreatorQuery.countTotal();
+//   // if (query.searchTerm){
+ 
 
-  const responseData = { meta, result };
-
-//   await redisClient.set('creators', JSON.stringify(responseData),
-//   //  {
-//   //   EX: 600, // optional: set expire in seconds (600s = 10 mins)
 //   // }
-// );
 
-  return responseData;
+//   // delete query.searchTerm;
+
+//     const CreatorQuery = new QueryBuilder(
+//       Creator.find()
+//         .populate({ path: 'userId', select: 'profile fullName email phone' })
+//         .select('accountHolderName phone email country status'),
+//       query,
+//     )
+//       .search(['phone', 'email', 'country'])
+//       .filter()
+//       .sort()
+//       .paginate()
+//       .fields();
+
+//   const result = await CreatorQuery.modelQuery;
+
+//   const meta = await CreatorQuery.countTotal();
+
+//   const responseData = { meta, result };
+
+
+//   return responseData;
+// };
+
+
+const getAllCreatorQuery = async (query: Record<string, unknown>) => {
+  console.log('query creator search value =', query);
+
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const searchTerm = query.searchTerm as string;
+
+  const pipeline: any[] = [
+    {
+      $lookup: {
+        from: 'users', 
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userDetails',
+      },
+    },
+    {
+      $unwind: {
+        path: '$userDetails',
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+    {
+      $project: {
+        accountHolderName: 1,
+        country: 1,
+        status: 1,
+        'userDetails._id': 1,
+        'userDetails.profile': 1,
+        'userDetails.fullName': 1,
+        'userDetails.email': 1,
+        'userDetails.phone': 1,
+      },
+    },
+  ];
+
+  if (searchTerm) {
+    pipeline.splice(2, 0, {
+      $match: {
+        $or: [
+          { country: { $regex: searchTerm, $options: 'i' } },
+          { 'userDetails.email': { $regex: searchTerm, $options: 'i' } },
+          { 'userDetails.phone': { $regex: searchTerm, $options: 'i' } },
+        ],
+      },
+    });
+  }
+
+  if (query.status) {
+    pipeline.splice(pipeline.length - 1, 0, {
+      $match: { status: query.status },
+    });
+  }
+
+  const sortField = query.sortBy || 'createdAt';
+  const sortOrder = query.sortOrder === 'desc' ? -1 : 1;
+  pipeline.push({ $sort: { [sortField as string]: sortOrder } });
+
+  const countPipeline = [...pipeline];
+  countPipeline.push({ $count: 'total' });
+
+  const dataPipeline = [...pipeline, { $skip: skip }, { $limit: limit }];
+
+  const [countResult, result] = await Promise.all([
+    Creator.aggregate(countPipeline),
+    Creator.aggregate(dataPipeline),
+  ]);
+
+  const total = countResult.length > 0 ? countResult[0].total : 0;
+
+  const formattedResult = result.map((item) => ({
+    _id: item._id,
+    country: item.country,
+    status: item.status,
+    userId: {
+      _id: item.userDetails._id,
+      profile: item.userDetails.profile,
+      fullName: item.userDetails.fullName,
+      email: item.userDetails.email,
+      phone: item.userDetails.phone,
+    },
+  }));
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+      totalPage: Math.ceil(total / limit),
+    },
+    result: formattedResult,
+  };
 };
+
+
 const getCreatorMeQuery = async (userId: string) => {
   console.log('me hit hoise');
   // const cachedCreator = await redisClient.get('creator');

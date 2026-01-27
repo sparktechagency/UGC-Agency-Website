@@ -1331,7 +1331,17 @@ const getAllCreatorByHirecreator = async (
 const getSingleHireCreatorQuery = async (id: string) => {
   const hireCreator: any = await HireCreator.findById(id)
     .populate('userId')
-    .populate('subscriptionId');
+    .populate({
+      path: 'subscriptionId',
+      select: 'subscriptionId',
+      populate: {
+        path: 'packageId',
+        select: 'title subtitle price type videoCount',
+      },
+    });
+
+    console.log('getSingleHireCreatorQuery **********', hireCreator);
+
   if (!hireCreator) {
     throw new AppError(404, 'HireCreator Not Found!!');
   }
@@ -2090,25 +2100,25 @@ console.log('assignCreators======', assignCreators);
         creatorsList: assignCreators
       };
       
-      await sendEmail(
-        admin.email,
-        'Revision Request from Hire Creator 🎉',
-        getMailAdminFromHireCreatorForVideoRevision(
-          revisionData.hireCreatorId,
-          revisionData.brandCreatorName,
-          revisionData.creatorsList
-        ),
+      const assignCreator = await AssignTaskCreator.updateMany(
+        { hireCreatorId: id },
+        { status: 'revision' },
+        { new: true, session },
       );
-
-      // const assignCreator = await AssignTaskCreator.updateMany(
-      //   { hireCreatorId: id },
-      //   { status: 'revision' },
-      //   { new: true, session },
-      // );
-      // if (!assignCreator) {
-      //   throw new AppError(403, 'assignCreator update failed!!');
-      // }
+      if (!assignCreator) {
+        throw new AppError(403, 'assignCreator update failed!!');
+      }
       // console.log('updateHireCreator', updateHireCreator);
+
+        await sendEmail(
+          admin.email,
+          'Revision Request from Hire Creator!🎉',
+          getMailAdminFromHireCreatorForVideoRevision(
+            revisionData.hireCreatorId,
+            revisionData.brandCreatorName,
+            revisionData.creatorsList,
+          ),
+        );
 
       await session.commitTransaction();
       session.endSession();

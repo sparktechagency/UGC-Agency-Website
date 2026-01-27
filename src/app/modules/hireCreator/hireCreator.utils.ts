@@ -72,13 +72,10 @@ h1, h2, h3, p {
 
   <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
     <p style="margin-bottom:15px;">
-      Great news! Your delivery for Project ID: cbjscslkcmsömc has been officially accepted by the client.
+      Great news! Your delivery for Project  has been officially accepted by the client.
     </p>
     <p style="margin-bottom:15px;">
       Thank you for your hard work, professionalism, and creativity. The client is very happy with the results.
-    </p>
-    <p style="margin-bottom:15px;">
-      We will contact you shortly to request your bank details so we can process your payment.
     </p>
     <p style="margin-bottom:15px;">
       If you have any questions, feel free to reach out.
