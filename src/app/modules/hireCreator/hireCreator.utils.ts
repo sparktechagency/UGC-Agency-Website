@@ -463,7 +463,7 @@ export const getRevisionEmailTemplate = (hireCreatorId: string, name: any) => {
 };
 
 
-export const getScriptBrandCreatorEmailTemplate = (hireCreatorName: string) => {
+export const getScriptBrandCreatorEmailTemplate = (hireCreatorName: string, hireCreatorId: string) => {
   return `
   <!DOCTYPE html>
 <html lang="en">
@@ -536,13 +536,10 @@ h1, h2, h3, p {
 
   <div style="background:#f1ede4; border-radius:40px; padding:40px; font-size:14px; color:#333; line-height:1.6;">
     <p style="margin-bottom:15px;">
-      Since no script was provided for the Project ID: hfcnsncnc, our admin has uploaded a suggested script to keep everything moving forward. You can find the script in your user account under the Order.
+      Since no script was provided for the Project ID: ${hireCreatorId}, our admin has uploaded a suggested script to keep everything moving forward. You can find the script in your user account under the Order.
     </p>
     <p style="margin-bottom:15px;">
       Please review and confirm the script at your earliest convenience. If you would like to request changes,please note that you can request one revision only. After that, the script will be finalized so production can begin.
-    </p>
-    <p style="margin-bottom:15px;">
-      We will contact you shortly to request your bank details so we can process your payment.
     </p>
     <p style="margin-top:20px;">
       Best Regards,<br>The Social Chance

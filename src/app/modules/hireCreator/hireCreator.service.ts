@@ -1773,7 +1773,7 @@ const assignAddIsScriptByAdmin = async (
       await sendEmail(
         hireCreatoruser.email,
         'Script Uploaded for Your Project Review 🎉',
-        getScriptBrandCreatorEmailTemplate(hireCreatoruser.fullName),
+        getScriptBrandCreatorEmailTemplate(hireCreatoruser.fullName, id),
       );
 
 
